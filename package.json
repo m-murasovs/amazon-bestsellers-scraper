@@ -5,11 +5,14 @@
 	"dependencies": {
 		"apify": "^0.20.0"
 	},
-	"devDependencies": {},
+	"devDependencies": {
+		"@apify/eslint-config": "0.0.3",
+		"eslint": "^6.8.0"
+	},
 	"scripts": {
-		"start": "node main.js",
+		"start": "node src/main.js",
 		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
 	},
 	"author": "It's not you it's me",
-	"license": "ISC"
+	"license": "Apache Version 2.0, January 2004"
 }
