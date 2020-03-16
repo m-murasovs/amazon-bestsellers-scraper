@@ -4,10 +4,13 @@
 
 // Include Apify SDK. For more information, see https://sdk.apify.com/
 const Apify = require('apify');
+
+const { log, enqueueLinks } = Apify.utils;
 const { URL } = require('url');
-const {
-    utils: { enqueueLinks },
-} = Apify;
+
+// const {
+//     utils: { enqueueLinks },
+// } = Apify;
 
 Apify.main(async () => {
     // Create a request queue instance and add a request
@@ -17,7 +20,7 @@ Apify.main(async () => {
     });
 
     const handlePageFunction = async ({ request, $ }) => {
-        const title = $('span[id^=productTitle] ').text();
+        const productTitle = $('span[id^=productTitle] ').text().trim();
 
         const price = $('span[id^=priceblock_ourprice]')
             .text()
@@ -35,7 +38,7 @@ Apify.main(async () => {
 
         const results = {
             url: request.url,
-            title: title.trim(),
+            title: productTitle,
             price: price.trim(),
             available: availability,
             rating: rating.trim(),
@@ -49,11 +52,14 @@ Apify.main(async () => {
             pseudoUrls: ['http[s?]://www.amazon.com[.*]/dp/[.*]'],
             baseUrl: request.loadedUrl,
         });
+
+        log.info(`Extracting... ${productTitle}`);
+
         await Apify.pushData(results);
     };
 
     const crawler = new Apify.CheerioCrawler({
-        maxRequestsPerCrawl: 10,
+        maxRequestsPerCrawl: 5,
         requestQueue,
         handlePageFunction,
     });
