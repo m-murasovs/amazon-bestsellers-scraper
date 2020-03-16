@@ -15,16 +15,17 @@ const { URL } = require('url');
 Apify.main(async () => {
     // Create a request queue instance and add a request
     const requestQueue = await Apify.openRequestQueue();
-    await requestQueue.addRequest({
-        url: 'https://www.amazon.com/Best-Sellers/zgbs',
-    });
+    // await requestQueue.addRequest({
+    //     url: 'https://www.amazon.com/Best-Sellers/zgbs',
+    // });
 
     const handlePageFunction = async ({ request, $ }) => {
         const productTitle = $('span[id^=productTitle] ').text().trim();
 
         const price = $('span[id^=priceblock_ourprice]')
             .text()
-            .replace(/(\r\n|\n|\r)/gm, '');
+            .replace(/(\r\n|\n|\r)/gm, '')
+            .trim();
 
         const rating = `${$('span[data-hook^=rating-out-of-text]').text().trim()} stars`;
 
