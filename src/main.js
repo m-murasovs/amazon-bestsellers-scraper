@@ -4,10 +4,10 @@
 
 // Include Apify SDK. For more information, see https://sdk.apify.com/
 const Apify = require('apify');
-// const { URL } = require('url');
-// const {
-//     utils: { enqueueLinks },
-// } = Apify;
+const { URL } = require('url');
+const {
+    utils: { enqueueLinks },
+} = Apify;
 
 Apify.main(async () => {
     // Create a request queue instance and add a request
@@ -21,8 +21,7 @@ Apify.main(async () => {
 
         const price = $('span[id^=priceblock_ourprice]')
             .text()
-            .replace(/(\r\n|\n|\r)/gm, '')
-            .trim();
+            .replace(/(\r\n|\n|\r)/gm, '');
 
         const rating = `${$('span[data-hook^=rating-out-of-text]').text().trim()} stars`;
 
@@ -42,16 +41,14 @@ Apify.main(async () => {
             rating: rating.trim(),
         };
 
-        console.log('results:', results)
-
         // CURRENTLY NOT USING ENQUEUED
-        // const enqueued = await enqueueLinks({
-        //     $,
-        //     requestQueue,
-        //     selector: 'div.a-section a[href]',
-        //     pseudoUrls: ['http[s?]://www.amazon.com[.*]/dp/[.*]'],
-        //     baseUrl: request.loadedUrl,
-        // });
+        const enqueued = await enqueueLinks({
+            $,
+            requestQueue,
+            selector: 'div.a-section a[href]',
+            pseudoUrls: ['http[s?]://www.amazon.com[.*]/dp/[.*]'],
+            baseUrl: request.loadedUrl,
+        });
         await Apify.pushData(results);
     };
 
