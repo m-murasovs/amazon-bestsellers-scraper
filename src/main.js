@@ -34,6 +34,7 @@ Apify.main(async () => {
             rating: rating.trim(),
         };
 
+        // not sure why this doesn't work when not a const - find out
         const enqueued = await enqueueLinks({
             $,
             requestQueue,
