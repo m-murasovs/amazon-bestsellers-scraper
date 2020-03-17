@@ -1,16 +1,6 @@
-// This is the main Node.js source code file of your actor.
-// It is referenced from the 'scripts' section of the package.json file,
-// so that it can be started by running 'npm start'.
-
-// Include Apify SDK. For more information, see https://sdk.apify.com/
 const Apify = require('apify');
-
+// const { URL } = require('url');
 const { log, enqueueLinks } = Apify.utils;
-const { URL } = require('url');
-
-// const {
-//     utils: { enqueueLinks },
-// } = Apify;
 
 Apify.main(async () => {
     // Create a request queue instance and add a request
@@ -20,7 +10,7 @@ Apify.main(async () => {
     });
 
     const handlePageFunction = async ({ request, $ }) => {
-        const productTitle = $('span[id^=productTitle] ').text().trim();
+        const title = $('span[id^=productTitle] ').text();
 
         const price = $('span[id^=priceblock_ourprice]')
             .text()
@@ -38,13 +28,12 @@ Apify.main(async () => {
 
         const results = {
             url: request.url,
-            title: productTitle,
+            title: title.trim(),
             price: price.trim(),
             available: availability,
             rating: rating.trim(),
         };
 
-        // CURRENTLY NOT USING ENQUEUED
         const enqueued = await enqueueLinks({
             $,
             requestQueue,
@@ -53,13 +42,12 @@ Apify.main(async () => {
             baseUrl: request.loadedUrl,
         });
 
-        log.info(`Extracting... ${productTitle}`);
-
+        await log.info(results);
         await Apify.pushData(results);
     };
 
     const crawler = new Apify.CheerioCrawler({
-        maxRequestsPerCrawl: 5,
+        maxRequestsPerCrawl: 10,
         requestQueue,
         handlePageFunction,
     });
