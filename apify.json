@@ -1,7 +1,6 @@
 {
-	"name": "first-scraper",
-	"version": "0.0",
-	"buildTag": "latest",
-	"env": null,
-	"template": "hello_world"
+    "name": "amazon-bestsellers-crawler",
+    "version": "0.0",
+    "buildTag": "latest",
+    "env": null
 }

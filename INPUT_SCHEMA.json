@@ -7,13 +7,14 @@
             "title": "Country",
             "type": "string",
             "description": "Enter the URL of the Amazon Best Sellers page you want to extract",
-            "editor": "text",
+            "editor": "textarea",
             "default": "https://www.amazon.com/Best-Sellers/zgbs"
         },
         "maxResults": {
             "title": "Number of results",
             "type": "integer",
             "description": "Total number of results per category you would like to save.",
+            "prefill": 0,
             "editor": "number"
         },
         "proxy": {

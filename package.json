@@ -1,20 +1,19 @@
 {
-	"name": "first-scraper",
-	"version": "0.0.1",
-	"description": "This is a boilerplate of an Apify actor.",
-	"dependencies": {
-		"apify": "^0.20.0",
-		"cheerio": "^1.0.0-rc.3",
-		"minimist": "^1.2.5"
-	},
-	"devDependencies": {
-		"@apify/eslint-config": "0.0.3",
-		"eslint": "^6.8.0"
-	},
-	"scripts": {
-		"start": "node src/main.js",
-		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
-	},
-	"author": "It's not you it's me",
-	"license": "Apache Version 2.0, January 2004"
+    "name": "amazon-bestsellers-crawler",
+    "version": "0.0.1",
+    "description": "Automatically extract the top selling items across all main categories.",
+    "dependencies": {
+        "apify": "^0.20.0",
+        "cheerio": "^1.0.0-rc.3",
+        "minimist": "^1.2.5"
+    },
+    "devDependencies": {
+        "@apify/eslint-config": "0.0.3",
+        "eslint": "^6.8.0"
+    },
+    "scripts": {
+        "start": "node src/main.js"
+    },
+    "author": "mihails@apify.com",
+    "license": "Apache Version 2.0, January 2004"
 }
