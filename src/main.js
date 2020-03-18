@@ -1,5 +1,7 @@
 const Apify = require('apify');
 
+const { log } = Apify.utils;
+
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
 
@@ -26,7 +28,7 @@ Apify.main(async () => {
             },
         },
         handlePageFunction: async ({ request, page }) => {
-            console.log('Processing:', request.url);
+            log.info(`Processing: ${await page.title()}, URL: ${request.url}`);
 
             if (request.userData.detailPage) {
                 // get category name
@@ -51,6 +53,7 @@ Apify.main(async () => {
                     items: {},
                 };
                 // Add scraped items to results
+                log.info('Creating results...');
                 for (let i = 0; i < Object.keys(itemsObj).length; i++) {
                     results.items[i] = {
                         name: itemsObj[i],
@@ -67,7 +70,7 @@ Apify.main(async () => {
                 page,
                 requestQueue,
                 selector: 'ul > li > a',
-                transformRequestFunction: req => {
+                transformRequestFunction: (req) => {
                     req.userData.detailPage = true;
                     return req;
                 },
@@ -79,4 +82,5 @@ Apify.main(async () => {
     });
 
     await crawler.run();
+    log.info('Crawl complete :)');
 });
