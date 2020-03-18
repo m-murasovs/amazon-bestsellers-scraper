@@ -1,16 +1,12 @@
 const Apify = require('apify');
 
-const { log } = Apify.utils;
-
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
 
     // Best Sellers home page where category links are
-    const baseUrl = ['https://www.amazon.com/Best-Sellers/zgbs/'];
-    const requestList = await Apify.openRequestList('categories', baseUrl);
+    await requestQueue.addRequest({ url: 'https://www.amazon.com/Best-Sellers/zgbs/' });
 
     const crawler = new Apify.PuppeteerCrawler({
-        requestList,
         requestQueue,
         launchPuppeteerOptions: {
             headless: true,
@@ -30,24 +26,19 @@ Apify.main(async () => {
             },
         },
         handlePageFunction: async ({ request, page }) => {
-            log.info('Processing:', request.url);
+            console.log('Processing:', request.url);
 
             if (request.userData.detailPage) {
                 // get category name
                 const title = await page.title();
-                // Info for the best selling itemsObj
-                // TODO: deal with itemsObj that are not found
-                // TODO: add images
+                // Scrape all items that match the selector
                 const itemsObj = await page.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
                 const pricesObj = await page.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
                 const urlsObj = await page.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
+                const imgsObj = await page.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
 
-                // Transform the scraped objects into arrays
-                const itemsArr = [];
-                const pricesArr = [];
+                // Get rid of duplicate URLs (couldn't avoid scraping them)
                 const urlsArr = [];
-                for (const product of itemsObj) itemsArr.push(product);
-                for (const price of pricesObj) pricesArr.push(price);
                 for (const link of urlsObj) {
                     if (!urlsArr.includes(link)) {
                         urlsArr.push(link);
@@ -59,31 +50,31 @@ Apify.main(async () => {
                     categoryUrl: request.url,
                     items: {},
                 };
-                // Add scraped items into the results array
-                for (let i = 0; i < itemsArr.length; i++) {
+                // Add scraped items to results
+                for (let i = 0; i < Object.keys(itemsObj).length; i++) {
                     results.items[i] = {
-                        name: itemsArr[i],
-                        price: pricesArr[i],
+                        name: itemsObj[i],
+                        price: pricesObj[i],
                         url: urlsArr[i],
+                        thumbnail: imgsObj[i],
                     };
                 }
 
+                console.log(results);
                 await Apify.pushData(results);
             }
 
             // Enqueue category pages on the Best Sellers homepage
-            if (!request.userData.detailPage) {
-                await Apify.utils.enqueueLinks({
-                    page,
-                    requestQueue,
-                    selector: 'ul > li > a',
-                    transformRequestFunction: req => {
-                        req.userData.detailPage = true;
-                        return req;
-                    },
-                    pseudoUrls: ['http[s?]://www.amazon.com/Best-Sellers[.*]'],
-                });
-            }
+            await Apify.utils.enqueueLinks({
+                page,
+                requestQueue,
+                selector: 'ul > li > a',
+                transformRequestFunction: req => {
+                    req.userData.detailPage = true;
+                    return req;
+                },
+                pseudoUrls: ['http[s?]://www.amazon.com/Best-Sellers[.*]'],
+            });
         },
         maxRequestsPerCrawl: 40,
         maxConcurrency: 10,
