@@ -6,7 +6,7 @@ Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
 
     // Best Sellers home page where category links are
-    await requestQueue.addRequest({ url: 'https://www.amazon.com/Best-Sellers/zgbs/' });
+    await requestQueue.addRequest({ url: 'https://www.amazon.co.uk/Best-Sellers/zgbs/' });
 
     const crawler = new Apify.PuppeteerCrawler({
         requestQueue,
@@ -74,7 +74,7 @@ Apify.main(async () => {
                     req.userData.detailPage = true;
                     return req;
                 },
-                pseudoUrls: ['http[s?]://www.amazon.com/Best-Sellers[.*]'],
+                pseudoUrls: ['http[s?]://www.amazon.[.*]/Best-Sellers[.*]'],
             });
         },
         maxRequestsPerCrawl: 40,

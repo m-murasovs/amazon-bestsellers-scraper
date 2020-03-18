@@ -1,14 +1,29 @@
 {
-  "title": "Input schema for the hello_word actor.",
-  "type": "object",
-  "schemaVersion": 1,
-  "properties": {
-    "message": {
-      "title": "Message",
-      "type": "string",
-      "description": "Just enter your hello world message.",
-      "editor": "textfield"
+    "title": "Amazon Best Sellers crawler",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "country": {
+            "title": "Country",
+            "type": "string",
+            "description": "Enter the URL of the Amazon Best Sellers page you want to extract",
+            "editor": "text",
+            "default": "https://www.amazon.com/Best-Sellers/zgbs"
+        },
+        "maxResults": {
+            "title": "Number of results",
+            "type": "integer",
+            "description": "Total number of results per category you would like to save.",
+            "editor": "number"
+        },
+        "proxy": {
+            "title": "Proxy configuration",
+            "type": "object",
+            "description": "Select proxies to be used by your crawler.",
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy"
+        }
     }
-  },
-  "required": []
 }
