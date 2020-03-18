@@ -4,10 +4,17 @@ const { log } = Apify.utils;
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
-    await requestQueue.addRequest({ url: 'https://www.amazon.com/Best-Sellers/zgbs/amazon-devices/ref=zg_bs_nav_0' });
-    const pseudoUrls = [new Apify.PseudoUrl('https://www.amazon.com/Best-Sellers[.*]')];
+
+    const baseUrl = [
+        'https://www.amazon.com/Best-Sellers/zgbs/',
+    ];
+
+    const requestList = await Apify.openRequestList('categories', baseUrl);
+
+    // const pseudoUrls = [new Apify.PseudoUrl('https://www.amazon.com/Best-Sellers[.*]')];
 
     const crawler = new Apify.PuppeteerCrawler({
+        requestList,
         requestQueue,
         launchPuppeteerOptions: {
             headless: true,
@@ -27,36 +34,43 @@ Apify.main(async () => {
             },
         },
         handlePageFunction: async ({ request, page }) => {
-            // get category name
-            const title = await page.title();
-            log.info(`Processing... ${title}`);
+            console.log('Processing:', request.url);
 
-            // Info for the best selling items
-            // TODO: deal with items that are not found
-            const itemName = await page.$eval('div.p13n-sc-truncated', el => el.innerHTML);
-            const itemUrl = await page.$eval('a.a-link-normal', el => el.href);
-            const itemPrice = await page.$eval('span.p13n-sc-price', el => el.innerHTML);
+            if (request.userData.detailPage) {
+                // get category name
+                const title = await page.title();
+                // Info for the best selling items
+                // TODO: deal with items that are not found
+                const itemName = await page.$$eval('div.p13n-sc-truncated', el => el.innerHTML);
+                const itemUrl = await page.$$eval('a.a-link-normal', el => el.href);
+                const itemPrice = await page.$$eval('span.p13n-sc-price', el => el.innerHTML);
 
+                const results = {
+                    category: title,
+                    categoryUrl: request.url,
+                    items: {
+                        item: itemName,
+                        url: itemUrl,
+                        price: itemPrice,
+                    },
+                };
+                await Apify.pushData(results);
+                console.log('RESULTS: ', results);
+            }
 
-            const results = {
-                category: title,
-                items: {
-                    item: itemName,
-                    url: itemUrl,
-                    price: itemPrice,
-                },
-            };
-
-            console.log(results);
-
-            await Apify.utils.enqueueLinks({
-                page,
-                selector: 'li > a',
-                pseudoUrls,
-                requestQueue,
-            });
+            if (!request.userData.detailPage) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'ul > li > a',
+                    transformRequestFunction: req => {
+                        req.userData.detailPage = true;
+                        return req;
+                    },
+                });
+            }
         },
-        maxRequestsPerCrawl: 5,
+        maxRequestsPerCrawl: 10,
         maxConcurrency: 10,
     });
 
