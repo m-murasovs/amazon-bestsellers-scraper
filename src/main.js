@@ -59,8 +59,6 @@ Apify.main(async () => {
                         thumbnail: imgsObj[i],
                     };
                 }
-
-                console.log(results);
                 await Apify.pushData(results);
             }
 
