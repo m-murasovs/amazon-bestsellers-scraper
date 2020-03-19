@@ -6,7 +6,8 @@ Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
     // Best Sellers home page where category links are
-    await requestQueue.addRequest({ url: 'https://www.amazon.co.uk/Best-Sellers/zgbs/' });
+    const domain = input.domain === 'amazon.co.uk' ? 'https://www.amazon.co.uk/Best-Sellers/zgbs/' : 'https://www.amazon.com/Best-Sellers/zgbs/';
+    await requestQueue.addRequest({ url: domain });
 
     const crawler = new Apify.PuppeteerCrawler({
         requestQueue,
@@ -33,10 +34,14 @@ Apify.main(async () => {
             if (request.userData.detailPage) {
                 // get category name
                 const title = await page.title();
+
                 // Scrape all items that match the selector
                 const itemsObj = await page.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
+
                 const pricesObj = await page.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
+
                 const urlsObj = await page.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
+
                 const imgsObj = await page.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
 
                 // Get rid of duplicate URLs (couldn't avoid scraping them)
@@ -52,6 +57,7 @@ Apify.main(async () => {
                     categoryUrl: request.url,
                     items: {},
                 };
+
                 // Add scraped items to results
                 log.info('Creating results...');
                 for (let i = 0; i < Object.keys(itemsObj).length; i++) {
@@ -64,20 +70,23 @@ Apify.main(async () => {
                 }
                 await Apify.pushData(results);
             }
-
+            // if (!request.userData.detailPage) {
             // Enqueue category pages on the Best Sellers homepage
             await Apify.utils.enqueueLinks({
                 page,
                 requestQueue,
-                selector: 'ul > li > a',
+                selector: 'ul > ul > li > a',
                 transformRequestFunction: (req) => {
                     req.userData.detailPage = true;
                     return req;
                 },
-                pseudoUrls: ['http[s?]://www.amazon.[.*]/Best-Sellers[.*]'],
+                // To return all 100 results, I
+                // Need to find a regex that has the request.url with '/ref=zg_bs_pg_2?_encoding=UTF8&pg=2' at the end.
+                // pseudoUrls: ['http[s?]://www.amazon.[.*]/Best-Sellers[.*]'],
             });
+            // }
         },
-        maxRequestsPerCrawl: 40,
+        maxRequestsPerCrawl: input.maxResults,
         maxConcurrency: 10,
         maxRequestRetries: 3,
     });
