@@ -51,8 +51,8 @@ Apify.main(async () => {
                 items: {},
             };
 
-            const getItems = async (pageObj) => {
-                if (request.userData.detailPage) {
+            const getItems = async (pageObj, resultsArr, req) => {
+                if (req.userData.detailPage) {
                     // Scrape all items that match the selector
                     const itemsObj = await pageObj.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
 
@@ -70,22 +70,23 @@ Apify.main(async () => {
                         }
                     }
 
-
-
                     // Add scraped items to results
                     log.info('Creating results...');
                     for (let i = 0; i < Object.keys(itemsObj).length; i++) {
-                        results.items[i] = {
+                        resultsArr.items[i] = {
                             name: itemsObj[i],
                             price: pricesObj[i],
                             url: urlsArr[i],
                             thumbnail: imgsObj[i],
                         };
                     }
-                    await saveItem(results, input, env.defaultDatasetId, session);
                 }
-            }
+            };
+            getItems(page, results, request);
 
+            await Apify.pushData(results);
+
+            // await saveItem(results, input, env.defaultDatasetId, session);
         },
         maxRequestsPerCrawl: 0,
         // remove when done
