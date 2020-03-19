@@ -17,12 +17,11 @@ async function checkSaveCount(datasetId, maxResults) {
     return false;
 }
 
-async function saveItem(item, input, datasetId, session) {
+async function saveItem(item, input, datasetId) {
     if (input.maxResults) {
         if (await checkSaveCount(datasetId, input.maxResults) === true) {
             await Apify.pushData(item);
         } else {
-            await session.sessionPool.persistState();
             log.info(`We have reached the max number of results (${input.maxResults}) results. The crawler will now exit.`);
             process.exit();
         }

@@ -26,6 +26,14 @@
             "default": 0,
             "editor": "number"
         },
+        "maxResultsPerCategory": {
+            "title": "Maximum number of results per category",
+            "type": "integer",
+            "description": "Total number of results you would like to save.",
+            "prefill": 0,
+            "default": 0,
+            "editor": "number"
+        },
         "proxy": {
             "title": "Proxy configuration",
             "type": "object",

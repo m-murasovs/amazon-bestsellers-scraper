@@ -9,14 +9,15 @@ The actor can currently extract the global (amazon.com) and the UK Best Sellers 
 ```json
 {
     "category": "Amazon.co.uk Best Sellers: The most popular items in Books",
-  "categoryUrl": "https://www.amazon.co.uk/Best-Sellers-Books/zgbs/books/ref=zg_bs_nav_0/261-6986927-7102013",
-  "items": {
-    "0": {
-      "name": "The Mirror and the Light (The Wolf Hall Trilogy)",
-      "price": "£15.49",
-      "url": "https://www.amazon.co.uk/Mirror-Light-Wolf-Hall-Trilogy/dp/0007480997/ref=zg_bs_books_1?_encoding=UTF8&psc=1&refRID=3PNZSWBH3A0H1QCWYPP6",
-      "thumbnail": "https://images-eu.ssl-images-amazon.com/images/I/91-UvTTh4lL._AC_UL200_SR200,200_.jpg"
-    },
+    "categoryUrl": "https://www.amazon.co.uk/Best-Sellers-Books/zgbs/books/ref=zg_bs_nav_0/261-6986927-7102013",
+    "items": {
+        "0": {
+            "name": "The Mirror and the Light (The Wolf Hall Trilogy)",
+            "price": "£15.49",
+            "url": "https://www.amazon.co.uk/Mirror-Light-Wolf-Hall-Trilogy/dp/0007480997/ref=zg_bs_books_1?_encoding=UTF8&psc=1&refRID=3PNZSWBH3A0H1QCWYPP6",
+            "thumbnail": "https://images-eu.ssl-images-amazon.com/images/I/91-UvTTh4lL._AC_UL200_SR200,200_.jpg"
+        },
+    }
 }
 ```
 ## Input
@@ -29,7 +30,7 @@ To limit the number of results that are extracted, set the **Number of options**
 
 ## Proxy
 
-For the actor to function properly, proxies are required. It is not recommended to run the actor on a free account for more than obtaining sample results. If you plan to run the actor for more than a few results, subscribe to the Apify platform and receive access to a large pool of proxies.
+For the actor to function properly, [proxies](https://docs.apify.com/proxy) are required. It is not recommended to run the actor on a free account for more than obtaining sample results. If you plan to run the actor for more than a few results, subscribe to the Apify platform and receive access to a large pool of proxies.
 
 ## Settings
 
@@ -46,6 +47,8 @@ In case of an error, the actor will complete its run immediately, without adding
 When it is finished, the actor will display a **Crawl complete.** message.
 
 ## CU usage
+
+In a whole run which extracted all 37 category pages, the actor consumed 0.2007 Compute Units.
 
 ![CU and CPU usage](src/img/CU-usage.png)
 

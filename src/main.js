@@ -33,6 +33,17 @@ Apify.main(async () => {
         handlePageFunction: async ({ request, page, session }) => {
             log.info(`Processing: ${await page.title()}, URL: ${request.url}`);
 
+            // Enqueue category pages on the Best Sellers homepage
+            await Apify.utils.enqueueLinks({
+                page,
+                requestQueue,
+                selector: 'div > ul > ul > li > a',
+                transformRequestFunction: (req) => {
+                    req.userData.detailPage = true;
+                    return req;
+                },
+            });
+
             if (request.userData.detailPage) {
                 // get category name
                 const title = await page.title();
@@ -72,19 +83,9 @@ Apify.main(async () => {
                 }
                 await saveItem(results, input, env.defaultDatasetId, session);
             }
-
-            // Enqueue category pages on the Best Sellers homepage
-            await Apify.utils.enqueueLinks({
-                page,
-                requestQueue,
-                selector: 'div > ul > ul > li > a',
-                transformRequestFunction: (req) => {
-                    req.userData.detailPage = true;
-                    return req;
-                },
-            });
         },
         maxRequestsPerCrawl: 0,
+        // remove when done
         maxConcurrency: 10,
         maxRequestRetries: 3,
     });
