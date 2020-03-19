@@ -1,6 +1,8 @@
-# My beautiful actor
+# Amazon Best Sellers Crawler
 
-The Amazon Best Sellers scraper extracts all items from the https://www.amazon.com/Best-Sellers/zgbs page. It will automatically extract all information from each of the product pages (price, title, images, ASIN number, etc).
+The Amazon Best Sellers crawler visits the main categories listed on the Amazon Best Sellers page. It extracts the 50 top-selling items from each category, complete with information such as name, price, URL, and a thumbnail image.
+
+If more information, such as item description or availablity, is required, the source code can be modified to include those.
 
 ## Sample result
 
@@ -18,10 +20,29 @@ The Amazon Best Sellers scraper extracts all items from the https://www.amazon.c
 }
 ```
 
+## Input parameters
+
+
+## Proxy
+
+For the actor to function properly, proxies are required. It is not recommended to run the actor on a free account for more than obtaining sample results. If you plan to run the actor for more than a few results, subscribe to the Apify platform and receive access to a large pool of proxies.
+
+## Additional options
+
+#### Number of results
+
+To limit the number of results that are extracted, set this value to the number of results you need. Otherwise, keep it blank or at 0. 
+
+This setting is not 100% accurate. Due to concurrent crawling of pages, one or two extra results per crawl will be returned.
+
+
+
 You can use [Markdown](https://www.markdownguide.org/cheat-sheet)
 language for rich formatting.
 
 ## Documentation reference
+
+For more information on the Apify platform, Apify actors, and the Apify CLI, please consult the links below.
 
 - [Apify SDK](https://sdk.apify.com/)
 - [Apify Actor documentation](https://docs.apify.com/actor)

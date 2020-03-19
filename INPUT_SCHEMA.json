@@ -6,7 +6,7 @@
         "domain": {
             "title": "Domain",
             "type": "string",
-            "description": "Select the URL of the Amazon Best Sellers page you want to extract",
+            "description": "Select the URL of the Amazon Best Sellers page you want to extract. Currently, only amazon.com and amazon.co.uk are available. If you would like other domains added, please get in touch.",
             "editor": "select",
             "default": "https://www.amazon.com/Best-Sellers/zgbs",
             "enum": [
@@ -21,7 +21,7 @@
         "maxResults": {
             "title": "Number of results",
             "type": "integer",
-            "description": "Total number of results per category you would like to save.",
+            "description": "Total number of results you would like to save.",
             "prefill": 0,
             "default": 0,
             "editor": "number"
