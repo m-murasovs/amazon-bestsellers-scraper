@@ -72,7 +72,7 @@ Apify.main(async () => {
                 }
                 await saveItem(results, input, env.defaultDatasetId, session);
             }
-            // if (!request.userData.detailPage) {
+
             // Enqueue category pages on the Best Sellers homepage
             await Apify.utils.enqueueLinks({
                 page,
@@ -84,9 +84,9 @@ Apify.main(async () => {
                 },
                 // To return all 100 results, I
                 // Need to find a regex that has the request.url with '/ref=zg_bs_pg_2?_encoding=UTF8&pg=2' at the end.
-                // pseudoUrls: ['http[s?]://www.amazon.[.*]/Best-Sellers[.*]'],
+                // But if I use the URL below, all the sub-categories are going to get brought in
+                // pseudoUrls: ['http[s?]://www.amazon.[.*]/Best-Sellers[.*]/ref=zg_bs_pg_2?_encoding=UTF8&pg=2'],
             });
-            // }
         },
         maxRequestsPerCrawl: 0,
         maxConcurrency: 10,
