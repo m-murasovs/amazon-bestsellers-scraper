@@ -5,7 +5,6 @@ const { log } = Apify.utils;
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
-    console.log(input)
     // Best Sellers home page where category links are
     await requestQueue.addRequest({ url: 'https://www.amazon.co.uk/Best-Sellers/zgbs/' });
 
@@ -80,6 +79,7 @@ Apify.main(async () => {
         },
         maxRequestsPerCrawl: 40,
         maxConcurrency: 10,
+        maxRequestRetries: 3,
     });
 
     await crawler.run();

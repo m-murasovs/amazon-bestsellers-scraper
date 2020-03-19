@@ -3,18 +3,26 @@
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "country": {
-            "title": "Country",
+        "domain": {
+            "title": "Domain",
             "type": "string",
-            "description": "Enter the URL of the Amazon Best Sellers page you want to extract",
-            "editor": "textarea",
-            "default": "https://www.amazon.com/Best-Sellers/zgbs"
+            "description": "Select the URL of the Amazon Best Sellers page you want to extract",
+            "editor": "select",
+            "default": "https://www.amazon.com/Best-Sellers/zgbs",
+            "enum": [
+                "https://www.amazon.com/Best-Sellers/zgbs",
+                "https://www.amazon.co.uk/Best-Sellers/zgbs"
+            ],
+            "enumTitles": [
+                "amazon.com",
+                "amazon.co.uk"
+            ]
         },
         "maxResults": {
             "title": "Number of results",
             "type": "integer",
             "description": "Total number of results per category you would like to save.",
-            "prefill": 0,
+            "default": 100,
             "editor": "number"
         },
         "proxy": {
