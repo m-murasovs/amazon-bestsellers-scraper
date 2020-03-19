@@ -1,21 +1,21 @@
 # Amazon Best Sellers Crawler
 
-The Amazon Best Sellers crawler visits the main categories listed on the Amazon Best Sellers page. It extracts the 50 top-selling items from each category, complete with information such as name, price, URL, and a thumbnail image.
+The actor crawls the Amazon Best Sellers categories and extracts the 50 top-selling items. It extracts the item's name, price, URL, and its thumbnail image.
 
-If more information, such as item description or availablity, is required, the source code can be modified to include those.
+The actor can currently extract the global (amazon.com) and the UK Best Sellers pages. 
 
 ## Sample result
 
 ```json
 {
-    "category": "Amazon.co.uk Best Sellers: The most popular items in Automotive",
-  "categoryUrl": "https://www.amazon.co.uk/Best-Sellers-Car-Motorbike/zgbs/automotive/ref=zg_bs_nav_0/260-1736080-5985605",
+    "category": "Amazon.co.uk Best Sellers: The most popular items in Books",
+  "categoryUrl": "https://www.amazon.co.uk/Best-Sellers-Books/zgbs/books/ref=zg_bs_nav_0/261-6986927-7102013",
   "items": {
     "0": {
-      "name": "Carplan De-Ionised Water 5L - DIW005",
-      "price": "£2.00",
-      "url": "https://www.amazon.co.uk/Carplan-Diw005-De-Ionised-Water-5Ltr/dp/B000C74XPE/ref=zg_bs_automotive_1?_encoding=UTF8&psc=1&refRID=GPZ6732XW8DK82NK8CZM",
-      "thumbnail": "https://images-eu.ssl-images-amazon.com/images/I/51VKKEz-DeL._AC_UL200_SR200,200_.jpg"
+      "name": "The Mirror and the Light (The Wolf Hall Trilogy)",
+      "price": "£15.49",
+      "url": "https://www.amazon.co.uk/Mirror-Light-Wolf-Hall-Trilogy/dp/0007480997/ref=zg_bs_books_1?_encoding=UTF8&psc=1&refRID=3PNZSWBH3A0H1QCWYPP6",
+      "thumbnail": "https://images-eu.ssl-images-amazon.com/images/I/91-UvTTh4lL._AC_UL200_SR200,200_.jpg"
     },
 }
 ```
