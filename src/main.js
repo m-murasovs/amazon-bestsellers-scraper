@@ -77,7 +77,7 @@ Apify.main(async () => {
             await Apify.utils.enqueueLinks({
                 page,
                 requestQueue,
-                selector: 'ul > ul > li > a',
+                selector: 'div > ul > ul > li > a',
                 transformRequestFunction: (req) => {
                     req.userData.detailPage = true;
                     return req;
@@ -88,7 +88,7 @@ Apify.main(async () => {
             });
             // }
         },
-        maxRequestsPerCrawl: input.maxResults,
+        maxRequestsPerCrawl: 0,
         maxConcurrency: 10,
         maxRequestRetries: 3,
     });
