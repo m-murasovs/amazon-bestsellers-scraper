@@ -7,7 +7,7 @@ Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
     const env = await Apify.getEnv();
-    // Best Sellers home page where category links are
+    // Select which domain to scrape
     const domain = input.domain === 'amazon.co.uk' ? 'https://www.amazon.co.uk/Best-Sellers/zgbs/' : 'https://www.amazon.com/Best-Sellers/zgbs/';
     await requestQueue.addRequest({ url: domain });
 
@@ -82,10 +82,6 @@ Apify.main(async () => {
                     req.userData.detailPage = true;
                     return req;
                 },
-                // To return all 100 results, I
-                // Need to find a regex that has the request.url with '/ref=zg_bs_pg_2?_encoding=UTF8&pg=2' at the end.
-                // But if I use the URL below, all the sub-categories are going to get brought in
-                // pseudoUrls: ['http[s?]://www.amazon.[.*]/Best-Sellers[.*]/ref=zg_bs_pg_2?_encoding=UTF8&pg=2'],
             });
         },
         maxRequestsPerCrawl: 0,
