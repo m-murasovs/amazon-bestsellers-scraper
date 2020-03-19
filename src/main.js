@@ -8,8 +8,7 @@ Apify.main(async () => {
     const input = await Apify.getValue('INPUT');
     const env = await Apify.getEnv();
     // Select which domain to scrape
-    const domain = input.domain === 'amazon.co.uk' ? 'https://www.amazon.co.uk/Best-Sellers/zgbs/' : 'https://www.amazon.com/Best-Sellers/zgbs/';
-    await requestQueue.addRequest({ url: domain });
+    await requestQueue.addRequest({ url: input.domain });
 
     const crawler = new Apify.PuppeteerCrawler({
         requestQueue,
@@ -31,7 +30,9 @@ Apify.main(async () => {
             },
         },
         handlePageFunction: async ({ request, page, session }) => {
-            log.info(`Processing: ${await page.title()}, URL: ${request.url}`);
+            // get and log category name
+            const title = await page.title();
+            log.info(`Processing: ${title}, URL: ${request.url}`);
 
             // Enqueue category pages on the Best Sellers homepage
             await Apify.utils.enqueueLinks({
@@ -44,45 +45,47 @@ Apify.main(async () => {
                 },
             });
 
-            if (request.userData.detailPage) {
-                // get category name
-                const title = await page.title();
+            const results = {
+                category: title,
+                categoryUrl: request.url,
+                items: {},
+            };
 
-                // Scrape all items that match the selector
-                const itemsObj = await page.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
+            const getItems = async (pageObj) => {
+                if (request.userData.detailPage) {
+                    // Scrape all items that match the selector
+                    const itemsObj = await pageObj.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
 
-                const pricesObj = await page.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
+                    const pricesObj = await pageObj.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
 
-                const urlsObj = await page.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
+                    const urlsObj = await pageObj.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
 
-                const imgsObj = await page.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
+                    const imgsObj = await pageObj.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
 
-                // Get rid of duplicate URLs (couldn't avoid scraping them)
-                const urlsArr = [];
-                for (const link of urlsObj) {
-                    if (!urlsArr.includes(link)) {
-                        urlsArr.push(link);
+                    // Get rid of duplicate URLs (couldn't avoid scraping them)
+                    const urlsArr = [];
+                    for (const link of urlsObj) {
+                        if (!urlsArr.includes(link)) {
+                            urlsArr.push(link);
+                        }
                     }
-                }
 
-                const results = {
-                    category: title,
-                    categoryUrl: request.url,
-                    items: {},
-                };
 
-                // Add scraped items to results
-                log.info('Creating results...');
-                for (let i = 0; i < Object.keys(itemsObj).length; i++) {
-                    results.items[i] = {
-                        name: itemsObj[i],
-                        price: pricesObj[i],
-                        url: urlsArr[i],
-                        thumbnail: imgsObj[i],
-                    };
+
+                    // Add scraped items to results
+                    log.info('Creating results...');
+                    for (let i = 0; i < Object.keys(itemsObj).length; i++) {
+                        results.items[i] = {
+                            name: itemsObj[i],
+                            price: pricesObj[i],
+                            url: urlsArr[i],
+                            thumbnail: imgsObj[i],
+                        };
+                    }
+                    await saveItem(results, input, env.defaultDatasetId, session);
                 }
-                await saveItem(results, input, env.defaultDatasetId, session);
             }
+
         },
         maxRequestsPerCrawl: 0,
         // remove when done

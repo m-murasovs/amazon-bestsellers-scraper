@@ -11,27 +11,25 @@
             "default": "https://www.amazon.com/Best-Sellers/zgbs",
             "enum": [
                 "https://www.amazon.com/Best-Sellers/zgbs",
-                "https://www.amazon.co.uk/Best-Sellers/zgbs"
+                "https://www.amazon.co.uk/Best-Sellers/zgbs",
+                "https://www.amazon.de/gp/bestsellers/?ref_=nav_cs_bestsellers",
+                "https://www.amazon.fr/gp/bestsellers/?ref_=nav_cs_bestsellers",
+                "https://www.amazon.es/gp/bestsellers/?ref_=nav_cs_bestsellers"
             ],
             "enumTitles": [
                 "amazon.com",
-                "amazon.co.uk"
+                "amazon.co.uk",
+                "amazon.de",
+                "amazon.fr",
+                "amazon.es"
             ]
         },
-        "maxResults": {
-            "title": "Number of results",
+        "depthOfCrawl": {
+            "title": "Depth of crawl",
             "type": "integer",
-            "description": "Total number of results you would like to save.",
-            "prefill": 0,
-            "default": 0,
-            "editor": "number"
-        },
-        "maxResultsPerCategory": {
-            "title": "Maximum number of results per category",
-            "type": "integer",
-            "description": "Total number of results you would like to save.",
-            "prefill": 0,
-            "default": 0,
+            "description": "How many subcategories would you like to visit?",
+            "prefill": 1,
+            "default": 1,
             "editor": "number"
         },
         "proxy": {
