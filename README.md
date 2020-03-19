@@ -19,26 +19,31 @@ If more information, such as item description or availablity, is required, the s
     },
 }
 ```
+## Input
 
-## Input parameters
+![Actor input screen](src/img/INPUT.png)
 
+The actor is set to crawl [amazon.com](https://www.amazon.com/Best-Sellers/zgbs/) by default. Click on the drop-down menu if you would like to crawl the [UK domain](https://www.amazon.co.uk/Best-Sellers/zgbs/).
+
+To limit the number of results that are extracted, set the **Number of options** value to the number of results you need. Otherwise, keep it blank or at 0. This setting is not 100% accurate. Due to concurrent crawling of pages, one or two extra results per crawl will be returned.
 
 ## Proxy
 
 For the actor to function properly, proxies are required. It is not recommended to run the actor on a free account for more than obtaining sample results. If you plan to run the actor for more than a few results, subscribe to the Apify platform and receive access to a large pool of proxies.
 
-## Additional options
+## Settings
 
-#### Number of results
+![Settings screen](src/img/SETTINGS.png)
 
-To limit the number of results that are extracted, set this value to the number of results you need. Otherwise, keep it blank or at 0. 
+Please ensure that Memory is set to at least **1024 MB** to ensure that the crawler has enough power to complete the task in a timely manner. If your machine allows, feel free to increase the memory allocation for more speed.
 
-This setting is not 100% accurate. Due to concurrent crawling of pages, one or two extra results per crawl will be returned.
+## During the run
 
+During the run, the actor will output messages notifying you of which page is being extracted. When the items are extracted, the actor will notify you that they are being added to the dataset. 
 
+In case of an error, the actor will complete its run immediately, without adding any data to the dataset.
 
-You can use [Markdown](https://www.markdownguide.org/cheat-sheet)
-language for rich formatting.
+When it is finished, the actor will display a **Crawl complete.** message.
 
 ## Documentation reference
 
@@ -47,4 +52,3 @@ For more information on the Apify platform, Apify actors, and the Apify CLI, ple
 - [Apify SDK](https://sdk.apify.com/)
 - [Apify Actor documentation](https://docs.apify.com/actor)
 - [Apify CLI](https://docs.apify.com/cli)
-# amazon-bestsellers-scraper
