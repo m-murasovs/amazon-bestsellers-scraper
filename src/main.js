@@ -51,44 +51,41 @@ Apify.main(async () => {
                 items: {},
             };
 
-            const getItems = async (pageObj) => {
-                if (request.userData.detailPage) {
-                    // Scrape all items that match the selector
-                    const itemsObj = await pageObj.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
+            if (request.userData.detailPage) {
+                // Scrape all items that match the selector
+                const itemsObj = await page.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
 
-                    const pricesObj = await pageObj.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
+                const pricesObj = await page.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
 
-                    const urlsObj = await pageObj.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
+                const urlsObj = await page.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
 
-                    const imgsObj = await pageObj.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
+                const imgsObj = await page.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
 
-                    // Get rid of duplicate URLs (couldn't avoid scraping them)
-                    const urlsArr = [];
-                    for (const link of urlsObj) {
-                        if (!urlsArr.includes(link)) {
-                            urlsArr.push(link);
-                        }
+                // Get rid of duplicate URLs (couldn't avoid scraping them)
+                const urlsArr = [];
+                for (const link of urlsObj) {
+                    if (!urlsArr.includes(link)) {
+                        urlsArr.push(link);
                     }
-
-
-
-                    // Add scraped items to results
-                    log.info('Creating results...');
-                    for (let i = 0; i < Object.keys(itemsObj).length; i++) {
-                        results.items[i] = {
-                            name: itemsObj[i],
-                            price: pricesObj[i],
-                            url: urlsArr[i],
-                            thumbnail: imgsObj[i],
-                        };
-                    }
-                    await saveItem(results, input, env.defaultDatasetId, session);
                 }
-            }
 
+                // Add scraped items to results
+                log.info('Creating results...');
+                for (let i = 0; i < Object.keys(itemsObj).length; i++) {
+                    results.items[i] = {
+                        name: itemsObj[i],
+                        price: pricesObj[i],
+                        url: urlsArr[i],
+                        thumbnail: imgsObj[i],
+                    };
+                }
+                // For now, don't need maxResult, so don't need this
+                // await saveItem(results, input, env.defaultDatasetId, session);
+                await Apify.pushData(results);
+            }
         },
         maxRequestsPerCrawl: 0,
-        // remove when done
+        // remove when done, as the platform doesn't need it
         maxConcurrency: 10,
         maxRequestRetries: 3,
     });
