@@ -45,6 +45,10 @@ In case of an error, the actor will complete its run immediately, without adding
 
 When it is finished, the actor will display a **Crawl complete.** message.
 
+## CU usage
+
+![CU and CPU usage](src/img/CU-usage.png)
+
 ## Documentation reference
 
 For more information on the Apify platform, Apify actors, and the Apify CLI, please consult the links below.
