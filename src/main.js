@@ -1,10 +1,12 @@
 const Apify = require('apify');
 
 const { log } = Apify.utils;
+const { saveItem } = require('./utils.js');
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
+    const env = await Apify.getEnv();
     // Best Sellers home page where category links are
     const domain = input.domain === 'amazon.co.uk' ? 'https://www.amazon.co.uk/Best-Sellers/zgbs/' : 'https://www.amazon.com/Best-Sellers/zgbs/';
     await requestQueue.addRequest({ url: domain });
@@ -28,7 +30,7 @@ Apify.main(async () => {
                 mockDeviceMemory: false,
             },
         },
-        handlePageFunction: async ({ request, page }) => {
+        handlePageFunction: async ({ request, page, session }) => {
             log.info(`Processing: ${await page.title()}, URL: ${request.url}`);
 
             if (request.userData.detailPage) {
@@ -68,7 +70,7 @@ Apify.main(async () => {
                         thumbnail: imgsObj[i],
                     };
                 }
-                await Apify.pushData(results);
+                await saveItem(results, input, env.defaultDatasetId, session);
             }
             // if (!request.userData.detailPage) {
             // Enqueue category pages on the Best Sellers homepage
@@ -92,5 +94,5 @@ Apify.main(async () => {
     });
 
     await crawler.run();
-    log.info('Crawl complete :)');
+    log.info('Crawl complete.');
 });

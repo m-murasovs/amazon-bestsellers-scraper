@@ -22,6 +22,7 @@
             "title": "Number of results",
             "type": "integer",
             "description": "Total number of results per category you would like to save.",
+            "prefill": 0,
             "default": 0,
             "editor": "number"
         },
