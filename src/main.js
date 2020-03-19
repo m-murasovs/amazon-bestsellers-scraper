@@ -1,16 +1,17 @@
 const Apify = require('apify');
 
 const { log } = Apify.utils;
+const { saveItem } = require('./utils.js');
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
-
-    // Best Sellers home page where category links are
-    const baseUrl = ['https://www.amazon.com/Best-Sellers/zgbs/'];
-    const requestList = await Apify.openRequestList('categories', baseUrl);
+    const input = await Apify.getValue('INPUT');
+    const env = await Apify.getEnv();
+    // Select which domain to scrape
+    const domain = input.domain === 'amazon.co.uk' ? 'https://www.amazon.co.uk/Best-Sellers/zgbs/' : 'https://www.amazon.com/Best-Sellers/zgbs/';
+    await requestQueue.addRequest({ url: domain });
 
     const crawler = new Apify.PuppeteerCrawler({
-        requestList,
         requestQueue,
         launchPuppeteerOptions: {
             headless: true,
@@ -29,25 +30,24 @@ Apify.main(async () => {
                 mockDeviceMemory: false,
             },
         },
-        handlePageFunction: async ({ request, page }) => {
-            log.info('Processing:', request.url);
+        handlePageFunction: async ({ request, page, session }) => {
+            log.info(`Processing: ${await page.title()}, URL: ${request.url}`);
 
             if (request.userData.detailPage) {
                 // get category name
                 const title = await page.title();
-                // Info for the best selling itemsObj
-                // TODO: deal with itemsObj that are not found
-                // TODO: add images
+
+                // Scrape all items that match the selector
                 const itemsObj = await page.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
+
                 const pricesObj = await page.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
+
                 const urlsObj = await page.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
 
-                // Transform the scraped objects into arrays
-                const itemsArr = [];
-                const pricesArr = [];
+                const imgsObj = await page.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
+
+                // Get rid of duplicate URLs (couldn't avoid scraping them)
                 const urlsArr = [];
-                for (const product of itemsObj) itemsArr.push(product);
-                for (const price of pricesObj) pricesArr.push(price);
                 for (const link of urlsObj) {
                     if (!urlsArr.includes(link)) {
                         urlsArr.push(link);
@@ -59,35 +59,36 @@ Apify.main(async () => {
                     categoryUrl: request.url,
                     items: {},
                 };
-                // Add scraped items into the results array
-                for (let i = 0; i < itemsArr.length; i++) {
+
+                // Add scraped items to results
+                log.info('Creating results...');
+                for (let i = 0; i < Object.keys(itemsObj).length; i++) {
                     results.items[i] = {
-                        name: itemsArr[i],
-                        price: pricesArr[i],
+                        name: itemsObj[i],
+                        price: pricesObj[i],
                         url: urlsArr[i],
+                        thumbnail: imgsObj[i],
                     };
                 }
-
-                await Apify.pushData(results);
+                await saveItem(results, input, env.defaultDatasetId, session);
             }
 
             // Enqueue category pages on the Best Sellers homepage
-            if (!request.userData.detailPage) {
-                await Apify.utils.enqueueLinks({
-                    page,
-                    requestQueue,
-                    selector: 'ul > li > a',
-                    transformRequestFunction: req => {
-                        req.userData.detailPage = true;
-                        return req;
-                    },
-                    pseudoUrls: ['http[s?]://www.amazon.com/Best-Sellers[.*]'],
-                });
-            }
+            await Apify.utils.enqueueLinks({
+                page,
+                requestQueue,
+                selector: 'div > ul > ul > li > a',
+                transformRequestFunction: (req) => {
+                    req.userData.detailPage = true;
+                    return req;
+                },
+            });
         },
-        maxRequestsPerCrawl: 40,
+        maxRequestsPerCrawl: 0,
         maxConcurrency: 10,
+        maxRequestRetries: 3,
     });
 
     await crawler.run();
+    log.info('Crawl complete.');
 });

@@ -1,14 +1,39 @@
 {
-  "title": "Input schema for the hello_word actor.",
-  "type": "object",
-  "schemaVersion": 1,
-  "properties": {
-    "message": {
-      "title": "Message",
-      "type": "string",
-      "description": "Just enter your hello world message.",
-      "editor": "textfield"
+    "title": "Amazon Best Sellers crawler",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "domain": {
+            "title": "Domain",
+            "type": "string",
+            "description": "Select the URL of the Amazon Best Sellers page you want to extract. Currently, only amazon.com and amazon.co.uk are available. If you would like other domains added, please get in touch.",
+            "editor": "select",
+            "default": "https://www.amazon.com/Best-Sellers/zgbs",
+            "enum": [
+                "https://www.amazon.com/Best-Sellers/zgbs",
+                "https://www.amazon.co.uk/Best-Sellers/zgbs"
+            ],
+            "enumTitles": [
+                "amazon.com",
+                "amazon.co.uk"
+            ]
+        },
+        "maxResults": {
+            "title": "Number of results",
+            "type": "integer",
+            "description": "Total number of results you would like to save.",
+            "prefill": 0,
+            "default": 0,
+            "editor": "number"
+        },
+        "proxy": {
+            "title": "Proxy configuration",
+            "type": "object",
+            "description": "Select proxies to be used by your crawler.",
+            "prefill": {
+                "useApifyProxy": true
+            },
+            "editor": "proxy"
+        }
     }
-  },
-  "required": []
 }
