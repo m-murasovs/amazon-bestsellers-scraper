@@ -1,6 +1,7 @@
 const Apify = require('apify');
 
 const { log } = Apify.utils;
+const { getItems } = require('./getItems.js');
 const { saveItem } = require('./utils.js');
 
 Apify.main(async () => {
@@ -29,7 +30,7 @@ Apify.main(async () => {
                 mockDeviceMemory: false,
             },
         },
-        handlePageFunction: async ({ request, page, session }) => {
+        handlePageFunction: async ({ request, page }) => {
             // get and log category name
             const title = await page.title();
             log.info(`Processing: ${title}, URL: ${request.url}`);
@@ -51,38 +52,10 @@ Apify.main(async () => {
                 items: {},
             };
 
-            const getItems = async (pageObj, resultsArr, req) => {
-                if (req.userData.detailPage) {
-                    // Scrape all items that match the selector
-                    const itemsObj = await pageObj.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
-
-                    const pricesObj = await pageObj.$$eval('span.p13n-sc-price', price => price.map(el => el.innerHTML));
-
-                    const urlsObj = await pageObj.$$eval('span.aok-inline-block > a.a-link-normal', link => link.map(url => url.href));
-
-                    const imgsObj = await pageObj.$$eval('a.a-link-normal > span > div.a-section > img', link => link.map(url => url.src));
-
-                    // Get rid of duplicate URLs (couldn't avoid scraping them)
-                    const urlsArr = [];
-                    for (const link of urlsObj) {
-                        if (!urlsArr.includes(link)) {
-                            urlsArr.push(link);
-                        }
-                    }
-
-                    // Add scraped items to results
-                    log.info('Creating results...');
-                    for (let i = 0; i < Object.keys(itemsObj).length; i++) {
-                        resultsArr.items[i] = {
-                            name: itemsObj[i],
-                            price: pricesObj[i],
-                            url: urlsArr[i],
-                            thumbnail: imgsObj[i],
-                        };
-                    }
-                }
-            };
-            getItems(page, results, request);
+            if (request.userData.detailPage) {
+                await getItems(page, results);
+                // return results;
+            }
 
             await Apify.pushData(results);
 
