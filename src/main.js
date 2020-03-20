@@ -1,68 +1,97 @@
-// This is the main Node.js source code file of your actor.
-// It is referenced from the 'scripts' section of the package.json file,
-// so that it can be started by running 'npm start'.
-
-// Include Apify SDK. For more information, see https://sdk.apify.com/
 const Apify = require('apify');
 
-const { log, enqueueLinks } = Apify.utils;
-const { URL } = require('url');
-
-// const {
-//     utils: { enqueueLinks },
-// } = Apify;
+const { log } = Apify.utils;
+const { scrapeDetailsPage } = require('./getItems.js');
 
 Apify.main(async () => {
-    // Create a request queue instance and add a request
     const requestQueue = await Apify.openRequestQueue();
-    await requestQueue.addRequest({
-        url: 'https://www.amazon.com/Best-Sellers/zgbs',
-    });
+    const input = await Apify.getValue('INPUT');
+    // Select which domain to scrape
+    await requestQueue.addRequest({ url: input.domain });
 
-    const handlePageFunction = async ({ request, $ }) => {
-        const productTitle = $('span[id^=productTitle] ').text().trim();
-
-        const price = $('span[id^=priceblock_ourprice]')
-            .text()
-            .replace(/(\r\n|\n|\r)/gm, '');
-
-        const rating = `${$('span[data-hook^=rating-out-of-text]').text().trim()} stars`;
-
-        const availability = $('div[id^=availability] span')
-            .text()
-            .replace(/(\r\n|\n|\r)/gm, '')
-            .trim();
-
-        // Find out how to address inconsistencies before using this
-        // const description = $('ul li span').text();
-
-        const results = {
-            url: request.url,
-            title: productTitle,
-            price: price.trim(),
-            available: availability,
-            rating: rating.trim(),
-        };
-
-        // CURRENTLY NOT USING ENQUEUED
-        const enqueued = await enqueueLinks({
-            $,
-            requestQueue,
-            selector: 'div.a-section a[href]',
-            pseudoUrls: ['http[s?]://www.amazon.com[.*]/dp/[.*]'],
-            baseUrl: request.loadedUrl,
-        });
-
-        log.info(`Extracting... ${productTitle}`);
-
-        await Apify.pushData(results);
-    };
-
-    const crawler = new Apify.CheerioCrawler({
-        maxRequestsPerCrawl: 5,
+    const crawler = new Apify.PuppeteerCrawler({
         requestQueue,
-        handlePageFunction,
+        launchPuppeteerOptions: {
+            headless: true,
+            stealth: true,
+            useChrome: true,
+            stealthOptions: {
+                addPlugins: false,
+                emulateWindowFrame: false,
+                emulateWebGL: false,
+                emulateConsoleDebug: false,
+                addLanguage: false,
+                hideWebDriver: true,
+                hackPermissions: false,
+                mockChrome: false,
+                mockChromeInIframe: false,
+                mockDeviceMemory: false,
+            },
+        },
+        handlePageFunction: async ({ request, page }) => {
+            // get and log category name
+            const title = await page.title();
+            log.info(`Processing: ${title}. URL: ${request.url}`);
+
+            const results = {
+                category: title,
+                categoryUrl: request.url,
+                items: [],
+            };
+
+            // Enqueue main category pages on the Best Sellers homepage
+            if (!request.userData.detailPage) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'div > ul > ul > li > a',
+                    transformRequestFunction: (req) => {
+                        req.userData.detailPage = true;
+                        req.userData.depthOfCrawl = 1;
+                        return req;
+                    },
+                });
+            }
+
+            // Enqueue second subcategory level
+            if (input.depthOfCrawl > 1 && request.userData.depthOfCrawl === 1) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'ul > ul > ul > li > a',
+                    transformRequestFunction: (req) => {
+                        req.userData.detailPage = true;
+                        req.userData.depthOfCrawl = 2;
+                        return req;
+                    },
+                });
+            }
+
+            // Enqueue 3rd subcategory level
+            if (input.depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'ul > ul > ul > li > a',
+                    transformRequestFunction: (req) => {
+                        req.userData.detailPage = true;
+                        req.userData.depthOfCrawl = 3;
+                        return req;
+                    },
+                });
+            }
+
+            // Scrape items from enqueued pages
+            if (request.userData.detailPage) {
+                await scrapeDetailsPage(page, results);
+            }
+
+            log.info(`Pending URLs: ${requestQueue.pendingCount}`);
+        },
+        maxRequestsPerCrawl: 0,
+        maxRequestRetries: 2,
     });
 
     await crawler.run();
+    log.info('Crawl complete.');
 });
