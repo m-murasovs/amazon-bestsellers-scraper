@@ -42,7 +42,7 @@ async function scrapeDetailsPage(req, pageObj, resultsArr) {
         await pageObj.waitForNavigation();
         await getItems(pageObj, resultsArr, req);
         await Apify.pushData(resultsArr);
-        log.info('Saving results...');
+        log.info(`Saving results from: ${await pageObj.title()}`);
     }
 }
 
