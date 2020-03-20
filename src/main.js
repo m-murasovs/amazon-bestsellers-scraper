@@ -1,7 +1,7 @@
 const Apify = require('apify');
 
 const { log } = Apify.utils;
-const { getItems } = require('./getItems.js');
+const { scrapeDetailsPage } = require('./getItems.js');
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
@@ -48,21 +48,11 @@ Apify.main(async () => {
             const results = {
                 category: title,
                 categoryUrl: request.url,
-                items: {},
+                items: [],
             };
 
-            if (request.userData.detailPage) {
-                await getItems(page, results, request);
-
-                // // go to page 2
-                // const nextPage = await page.waitFor('li.a-last > a');
-                // await nextPage.click();
-                // await page.waitForNavigation({ waitUntil: 'load' });
-                // await Apify.utils.sleep(10000);
-                // await getItems(page, results, request);
-            }
-
-            await Apify.pushData(results);
+            // Scrape items from a [sub]category page and save
+            await scrapeDetailsPage(request, page, results);
         },
         maxRequestsPerCrawl: 0,
         maxRequestRetries: 3,
