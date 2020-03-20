@@ -29,7 +29,7 @@
         "depthOfCrawl": {
             "title": "Depth of crawl",
             "type": "integer",
-            "description": "How many subcategories would you like to visit? Amazon Best Sellers includes 37 main categories. Several of these have another two levels of subcategorisation. Selecting '3' will return the maximum number of results.",
+            "description": "How many subcategories would you like to visit? Amazon Best Sellers includes 37 main categories. Several of these have another two levels of subcategorisation. \n Setting a crawl depth of 2 returns 556 subcategories, each with 100 results and 5-10 more subcategories. That's a LOT of data.",
             "prefill": 1,
             "default": 1,
             "min": 1,
@@ -39,7 +39,7 @@
         "proxy": {
             "title": "Proxy configuration",
             "type": "object",
-            "description": "Select proxies to be used by your crawler. Visit https://docs.apify.com/proxy for more information.",
+            "description": "Select proxies to be used by your crawler. For more information, visit https://docs.apify.com/proxy",
             "prefill": {
                 "useApifyProxy": true
             },

@@ -1,8 +1,8 @@
 # Amazon Best Sellers Crawler
 
-The actor crawls the Amazon Best Sellers categories and extracts the 50 top-selling items. It extracts the item's name, price, URL, and its thumbnail image.
+The actor crawls the Amazon Best Sellers categories and extracts the 100 top selling items. It extracts the item's name, price, URL, and its thumbnail image.
 
-The actor can currently extract the global (amazon.com) and the UK Best Sellers pages. 
+The actor can currently extract the .com, .co.uk, .de, .fr, .es, and .it domains.  If you would like to add support for another domain, please get in touch or edit the source code [yourself](https://github.com/m-murasovs/amazon-bestsellers-scraper).
 
 ## Sample result
 
@@ -24,9 +24,11 @@ The actor can currently extract the global (amazon.com) and the UK Best Sellers 
 
 ![Actor input screen](src/img/INPUT.png)
 
-The actor is set to crawl [amazon.com](https://www.amazon.com/Best-Sellers/zgbs/) by default. Click on the drop-down menu if you would like to crawl the [UK domain](https://www.amazon.co.uk/Best-Sellers/zgbs/).
+The actor is set to crawl [amazon.com](https://www.amazon.com/Best-Sellers/zgbs/) by default. Click on the drop-down menu if you would like to crawl another domain. Currently, the .co.uk, .de, .fr, .es, and .it domains are supported. 
 
-To limit the number of results that are extracted, set the **Number of options** value to the number of results you need. Otherwise, keep it blank or at 0. This setting is not 100% accurate. Due to concurrent crawling of pages, one or two extra results per crawl will be returned.
+To limit the number of results that are extracted, set the **Depth of crawl** value to the number of subcategories you would like to extract. 
+
+Amazon Best Sellers includes 37 main categories. Several of these have another two levels of subcategorisation. Setting a crawl depth of 2 extracts 556 pages. A crawl depth of 3 extracts upward of 1600 pages.
 
 ## Proxy
 
@@ -40,7 +42,9 @@ Please ensure that Memory is set to at least **1024 MB** to ensure that the craw
 
 ## During the run
 
-During the run, the actor will output messages notifying you of which page is being extracted. When the items are extracted, the actor will notify you that they are being added to the dataset. 
+During the run, the actor will output messages notifying you of which page is being extracted. When the items are extracted, the actor will notify you that they are being saved. 
+
+Due to concurrent extraction of pages, these notifications may not be displayed in order.
 
 In case of an error, the actor will complete its run immediately, without adding any data to the dataset.
 
