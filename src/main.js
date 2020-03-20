@@ -2,12 +2,11 @@ const Apify = require('apify');
 
 const { log } = Apify.utils;
 const { getItems } = require('./getItems.js');
-const { saveItem } = require('./utils.js');
+// const { saveItem } = require('./utils.js');
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
-    const env = await Apify.getEnv();
     // Select which domain to scrape
     await requestQueue.addRequest({ url: input.domain });
 
@@ -42,6 +41,7 @@ Apify.main(async () => {
                 selector: 'div > ul > ul > li > a',
                 transformRequestFunction: (req) => {
                     req.userData.detailPage = true;
+                    req.userData.crawlDepth = 1;
                     return req;
                 },
             });
@@ -52,9 +52,14 @@ Apify.main(async () => {
                 items: {},
             };
 
-            if (request.userData.detailPage) {
-                await getItems(page, results);
-                // return results;
+            if (request.userData.detailPage && request.userData.crawlDepth === 1) {
+                await getItems(page, results, request);
+
+                // go to page 2
+                const nextPage = await page.waitFor('li.a-last > a');
+                await nextPage.click();
+                await page.waitForNavigation({ waitUntil: 'load' });
+                await getItems(page, results, request);
             }
 
             await Apify.pushData(results);
@@ -62,8 +67,6 @@ Apify.main(async () => {
             // await saveItem(results, input, env.defaultDatasetId, session);
         },
         maxRequestsPerCrawl: 0,
-        // remove when done
-        maxConcurrency: 10,
         maxRequestRetries: 3,
     });
 

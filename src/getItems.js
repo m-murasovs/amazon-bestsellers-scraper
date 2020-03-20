@@ -2,7 +2,10 @@ const Apify = require('apify');
 
 const { log } = Apify.utils;
 
-async function getItems(pageObj, resultsArr) {
+async function getItems(pageObj, resultsArr, req) {
+    // log which page is being scraped
+    const requu = req.url.includes('pg=2') ? 'SCRAPING PAGE 2' : 'page 1';
+    log.info(`REQUEST: ${requu} ${'\n'} ${req.url}`);
     // Scrape all items that match the selector
     const itemsObj = await pageObj.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
 
@@ -20,7 +23,7 @@ async function getItems(pageObj, resultsArr) {
         }
     }
 
-    // Add scraped items to results
+    // Add scraped items to results array
     log.info('Creating results...');
     for (let i = 0; i < Object.keys(itemsObj).length; i++) {
         resultsArr.items[i] = {
@@ -30,6 +33,6 @@ async function getItems(pageObj, resultsArr) {
             thumbnail: imgsObj[i],
         };
     }
-};
+}
 
 module.exports = { getItems };
