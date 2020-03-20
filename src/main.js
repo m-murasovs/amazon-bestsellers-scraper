@@ -80,13 +80,13 @@ Apify.main(async () => {
                     },
                 });
             }
+            // Log number of pending URLs
+            log.info(`Pending URLs: ${requestQueue.pendingCount}`);
 
             // Scrape items from enqueued pages
             if (request.userData.detailPage) {
                 await scrapeDetailsPage(page, results);
             }
-
-            log.info(`Pending URLs: ${requestQueue.pendingCount}`);
         },
         maxRequestsPerCrawl: 0,
         maxRequestRetries: 2,

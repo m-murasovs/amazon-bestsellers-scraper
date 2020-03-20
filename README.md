@@ -46,6 +46,8 @@ During the run, the actor will output messages notifying you of which page is be
 
 Due to concurrent extraction of pages, these notifications may not be displayed in order.
 
+The number of pending URLs is displayed throughout the run.
+
 In case of an error, the actor will complete its run immediately, without adding any data to the dataset.
 
 When it is finished, the actor will display a **Crawl complete.** message.
