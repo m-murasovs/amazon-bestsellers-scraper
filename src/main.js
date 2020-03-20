@@ -59,6 +59,7 @@ Apify.main(async () => {
                 const nextPage = await page.waitFor('li.a-last > a');
                 await nextPage.click();
                 await page.waitForNavigation({ waitUntil: 'load' });
+                await Apify.utils.sleep(10000);
                 await getItems(page, results, request);
             }
 
