@@ -6,7 +6,7 @@
         "domain": {
             "title": "Domain",
             "type": "string",
-            "description": "Select the URL of the Amazon Best Sellers page you want to extract. Currently, only amazon.com and amazon.co.uk are available. If you would like other domains added, please get in touch.",
+            "description": "Select the URL of the Amazon Best Sellers page you want to extract.",
             "editor": "select",
             "default": "https://www.amazon.com/Best-Sellers/zgbs",
             "enum": [
@@ -14,28 +14,32 @@
                 "https://www.amazon.co.uk/Best-Sellers/zgbs",
                 "https://www.amazon.de/gp/bestsellers/?ref_=nav_cs_bestsellers",
                 "https://www.amazon.fr/gp/bestsellers/?ref_=nav_cs_bestsellers",
-                "https://www.amazon.es/gp/bestsellers/?ref_=nav_cs_bestsellers"
+                "https://www.amazon.es/gp/bestsellers/?ref_=nav_cs_bestsellers",
+                "https://www.amazon.it/gp/bestsellers/?ref_=nav_cs_bestsellers"
             ],
             "enumTitles": [
                 "amazon.com",
                 "amazon.co.uk",
                 "amazon.de",
                 "amazon.fr",
-                "amazon.es"
+                "amazon.es",
+                "amazon.it"
             ]
         },
         "depthOfCrawl": {
             "title": "Depth of crawl",
             "type": "integer",
-            "description": "How many subcategories would you like to visit?",
+            "description": "How many subcategories would you like to visit? Amazon Best Sellers includes 37 main categories. Several of these have another two levels of subcategorisation. Selecting '3' will return the maximum number of results.",
             "prefill": 1,
             "default": 1,
+            "min": 1,
+            "max": 3,
             "editor": "number"
         },
         "proxy": {
             "title": "Proxy configuration",
             "type": "object",
-            "description": "Select proxies to be used by your crawler.",
+            "description": "Select proxies to be used by your crawler. Visit https://docs.apify.com/proxy for more information.",
             "prefill": {
                 "useApifyProxy": true
             },
