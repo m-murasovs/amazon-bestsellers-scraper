@@ -32,18 +32,16 @@ async function getItems(pageObj, resultsArr) {
     }
 }
 
-async function scrapeDetailsPage(req, pageObj, resultsArr) {
-    if (req.userData.detailPage) {
-        // Scrape page 1
-        await getItems(pageObj, resultsArr, req);
-        // Go to page 2 and scrape
-        const nextPage = await pageObj.waitFor('li.a-last > a');
-        await nextPage.click();
-        await pageObj.waitForNavigation();
-        await getItems(pageObj, resultsArr, req);
-        await Apify.pushData(resultsArr);
-        log.info('Saving results...');
-    }
+async function scrapeDetailsPage(pageObj, resultsArr) {
+    // Scrape page 1
+    await getItems(pageObj, resultsArr);
+    // Go to page 2 and scrape
+    const nextPage = await pageObj.waitFor('li.a-last > a');
+    await nextPage.click();
+    await pageObj.waitForNavigation();
+    await getItems(pageObj, resultsArr);
+    await Apify.pushData(resultsArr);
+    log.info(`Saving results from ${await pageObj.title()}`);
 }
 
 module.exports = { scrapeDetailsPage };

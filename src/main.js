@@ -31,19 +31,7 @@ Apify.main(async () => {
         handlePageFunction: async ({ request, page }) => {
             // get and log category name
             const title = await page.title();
-            log.info(`Processing: ${title}, URL: ${request.url}`);
-
-            // Enqueue category pages on the Best Sellers homepage
-            await Apify.utils.enqueueLinks({
-                page,
-                requestQueue,
-                selector: 'div > ul > ul > li > a',
-                transformRequestFunction: (req) => {
-                    req.userData.detailPage = true;
-                    req.userData.crawlDepth = 1;
-                    return req;
-                },
-            });
+            log.info(`Processing: ${title}. URL: ${request.url}`);
 
             const results = {
                 category: title,
@@ -51,11 +39,57 @@ Apify.main(async () => {
                 items: [],
             };
 
-            // Scrape items from a [sub]category page and save
-            await scrapeDetailsPage(request, page, results);
+            // Enqueue main category pages on the Best Sellers homepage
+            if (!request.userData.detailPage) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'div > ul > ul > li > a',
+                    transformRequestFunction: (req) => {
+                        req.userData.detailPage = true;
+                        req.userData.depthOfCrawl = 1;
+                        return req;
+                    },
+                });
+            }
+
+            // Enqueue second subcategory level
+            if (input.depthOfCrawl > 1 && request.userData.depthOfCrawl === 1) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'ul > ul > ul > li > a',
+                    transformRequestFunction: (req) => {
+                        req.userData.detailPage = true;
+                        req.userData.depthOfCrawl = 2;
+                        return req;
+                    },
+                });
+            }
+
+            // Enqueue 3rd subcategory level
+            if (input.depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
+                await Apify.utils.enqueueLinks({
+                    page,
+                    requestQueue,
+                    selector: 'ul > ul > ul > li > a',
+                    transformRequestFunction: (req) => {
+                        req.userData.detailPage = true;
+                        req.userData.depthOfCrawl = 3;
+                        return req;
+                    },
+                });
+            }
+
+            // Scrape items from enqueued pages
+            if (request.userData.detailPage) {
+                await scrapeDetailsPage(page, results);
+            }
+
+            log.info(`Pending URLs: ${requestQueue.pendingCount}`);
         },
         maxRequestsPerCrawl: 0,
-        maxRequestRetries: 3,
+        maxRequestRetries: 2,
     });
 
     await crawler.run();
