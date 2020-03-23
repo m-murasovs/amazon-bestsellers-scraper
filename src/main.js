@@ -89,7 +89,7 @@ Apify.main(async () => {
             }
         },
         maxRequestsPerCrawl: 0,
-        maxRequestRetries: 2,
+        maxRequestRetries: 1,
     });
 
     await crawler.run();
