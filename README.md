@@ -1,8 +1,10 @@
 # Amazon Best Sellers Crawler
 
-The Actor crawls the Amazon Best Sellers categories and extracts the 100 top selling items. It extracts the item's name, price, URL, and its thumbnail image.
+The actor crawls the Amazon Best Sellers categories and extracts the 100 top selling items. It extracts the item's name, price, URL, and its thumbnail image.
 
-The Actor can currently extract the .com, .co.uk, .de, .fr, .es, and .it domains.  If you would like to add support for another domain, please get in touch or edit the source code [yourself](https://github.com/m-murasovs/amazon-bestsellers-scraper).
+By default, the actor extracts the 37 main Best Seller subcategories. A further level of crawl depth can be added, which also extracts the top selling items from the first level of the main categories' sub-divisions.
+
+The actor can currently extract the .com, .co.uk, .de, .fr, .es, and .it domains.  If you would like to add support for another domain, please get in touch or edit the source code [yourself](https://github.com/m-murasovs/amazon-bestsellers-scraper).
 
 ## Use cases
 
@@ -38,19 +40,17 @@ Please ensure that Memory is set to at least **1024 MB** to ensure that the craw
 
 ## During the run
 
-During the run, the Actor will output messages notifying you of which page is being extracted. When the items are extracted, the Actor will notify you that they are being saved. 
+During the run, the actor will output messages notifying you of which page is being extracted. When the items are extracted, the actor will notify you that they are being saved. 
 
 Due to concurrent extraction of pages, these notifications may not be displayed in order.
 
-The number of pending URLs is displayed throughout the run.
+In case of an error, the actor will complete its run immediately, without adding any data to the dataset.
 
-In case of an error, the Actor will complete its run immediately, without adding any data to the dataset.
-
-When it is finished, the Actor will display a **Crawl complete.** message.
+When it is finished, the actor will display a **Crawl complete.** message.
 
 ## CU usage
 
-For every 100 pages scraped, the Actor will consume 0.6 Compute Units. This means that with 1 Compute Unit, you can scrape around 160 pages.
+For every 100 pages scraped, the actor will consume 0.6 Compute Units. This means that with 1 Compute Unit, you can scrape around 160 pages.
 
 ## Proxy configuration
 
@@ -130,7 +130,7 @@ It accepts a JSON object with the following structure:
 
 ## Documentation reference
 
-For more information on the Apify platform, Apify Actors, and the Apify CLI, please consult the links below.
+For more information on the Apify platform, Apify actors, and the Apify CLI, please consult the links below.
 
 - [Apify SDK](https://sdk.apify.com/)
 - [Apify Actor documentation](https://docs.apify.com/actor)

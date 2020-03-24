@@ -29,7 +29,7 @@
         "depthOfCrawl": {
             "title": "Depth of crawl",
             "type": "integer",
-            "description": "How many subcategories would you like to visit? Minimum working value is 1, maximum is 3. Amazon Best Sellers includes 37 main categories. Several of these have another two levels of subcategorisation. Setting a crawl depth of 2 returns over 550 subcategories, each with 100 results and 5-10 more subcategories.",
+            "description": "How many subcategories would you like to visit? Minimum working value is 1, maximum is 2. Amazon Best Sellers includes 37 main categories. All of these have at least one more level of subcategorisation. Setting a crawl depth of 2 returns roughly 510 subcategories, each with 100 results. If you would like to extract more subcategories, please, get in touch.",
             "prefill": 1,
             "default": 1,
             "editor": "number"
