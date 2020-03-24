@@ -1,6 +1,6 @@
 const Apify = require('apify');
 
-const { log } = Apify.utils;
+const { log, enqueueLinks } = Apify.utils;
 const { scrapeDetailsPage } = require('./getItems.js');
 
 Apify.main(async () => {
@@ -41,7 +41,7 @@ Apify.main(async () => {
 
             // Enqueue main category pages on the Best Sellers homepage
             if (!request.userData.detailPage) {
-                await Apify.utils.enqueueLinks({
+                await enqueueLinks({
                     page,
                     requestQueue,
                     selector: 'div > ul > ul > li > a',
@@ -54,8 +54,8 @@ Apify.main(async () => {
             }
 
             // Enqueue second subcategory level
-            if (input.depthOfCrawl > 1 && request.userData.depthOfCrawl === 1) {
-                await Apify.utils.enqueueLinks({
+            if (input.depthOfCrawl === 2 && request.userData.depthOfCrawl === 1) {
+                await enqueueLinks({
                     page,
                     requestQueue,
                     selector: 'ul > ul > ul > li > a',
@@ -67,26 +67,26 @@ Apify.main(async () => {
                 });
             }
 
-            // Enqueue 3rd subcategory level
-            if (input.depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
-                await Apify.utils.enqueueLinks({
-                    page,
-                    requestQueue,
-                    selector: 'ul > ul > ul > li > a',
-                    transformRequestFunction: (req) => {
-                        req.userData.detailPage = true;
-                        req.userData.depthOfCrawl = 3;
-                        return req;
-                    },
-                });
-            }
-            // Log number of pending URLs
-            log.info(`Pending URLs: ${requestQueue.pendingCount}`);
+            // ADD IN CASE MORE DATA IS NEEDED (ADDING 3RD SUBCATEGORY LEVEL)
+            // // Enqueue 3rd subcategory level
+            // if (input.depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
+            //     await enqueueLinks({
+            //         page,
+            //         requestQueue,
+            //         selector: 'ul > ul > ul > li > a',
+            //         transformRequestFunction: (req) => {
+            //             req.userData.detailPage = true;
+            //             req.userData.depthOfCrawl = 3;
+            //             return req;
+            //         },
+            //     });
+            // }
+
+            // Log number of pending URLs (works only locally)
+            // log.info(`Pending URLs: ${requestQueue.pendingCount}`);
 
             // Scrape items from enqueued pages
-            if (request.userData.detailPage) {
-                await scrapeDetailsPage(page, results);
-            }
+            await scrapeDetailsPage(page, results);
         },
         maxRequestsPerCrawl: 0,
         maxRequestRetries: 1,
