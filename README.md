@@ -4,7 +4,18 @@ The Actor crawls the Amazon Best Sellers categories and extracts the 100 top sel
 
 The Actor can currently extract the .com, .co.uk, .de, .fr, .es, and .it domains.  If you would like to add support for another domain, please get in touch or edit the source code [yourself](https://github.com/m-murasovs/amazon-bestsellers-scraper).
 
-## Sample result
+## Use cases
+
+* Researching retail trends
+* Researching marketing trends
+
+## Input
+
+* The domain you want to extract
+* Depth of crawl - how many subcategories you want to extract
+* Proxy
+
+## Output
 
 ```json
 {
@@ -20,13 +31,26 @@ The Actor can currently extract the .com, .co.uk, .de, .fr, .es, and .it domains
     }
 }
 ```
-## Input
 
-The Actor is set to crawl [amazon.com](https://www.amazon.com/Best-Sellers/zgbs/) by default. Click on the drop-down menu if you would like to crawl another domain. Currently, the .co.uk, .de, .fr, .es, and .it domains are supported. 
+## Settings
 
-To limit the number of results that are extracted, set the **Depth of crawl** value to the number of subcategories you would like to extract. 
+Please ensure that Memory is set to at least **1024 MB** to ensure that the crawler has enough power to complete the task in a timely manner. If your machine allows, feel free to increase the memory allocation for more speed.
 
-Amazon Best Sellers includes 37 main categories. Several of these have another two levels of subcategorisation. Setting a crawl depth of 2 extracts 556 pages. A crawl depth of 3 extracts upward of 1600 pages.
+## During the run
+
+During the run, the Actor will output messages notifying you of which page is being extracted. When the items are extracted, the Actor will notify you that they are being saved. 
+
+Due to concurrent extraction of pages, these notifications may not be displayed in order.
+
+The number of pending URLs is displayed throughout the run.
+
+In case of an error, the Actor will complete its run immediately, without adding any data to the dataset.
+
+When it is finished, the Actor will display a **Crawl complete.** message.
+
+## CU usage
+
+For every 100 pages scraped, the Actor will consume 0.6 Compute Units. This means that with 1 Compute Unit, you can scrape around 160 pages.
 
 ## Proxy configuration
 
@@ -103,26 +127,6 @@ It accepts a JSON object with the following structure:
     "proxyUrls": String[],
 }
 ```
-
-## Settings
-
-Please ensure that Memory is set to at least **1024 MB** to ensure that the crawler has enough power to complete the task in a timely manner. If your machine allows, feel free to increase the memory allocation for more speed.
-
-## During the run
-
-During the run, the Actor will output messages notifying you of which page is being extracted. When the items are extracted, the Actor will notify you that they are being saved. 
-
-Due to concurrent extraction of pages, these notifications may not be displayed in order.
-
-The number of pending URLs is displayed throughout the run.
-
-In case of an error, the Actor will complete its run immediately, without adding any data to the dataset.
-
-When it is finished, the Actor will display a **Crawl complete.** message.
-
-## CU usage
-
-For every 100 pages scraped, the Actor will consume 0.6 Compute Units. This means that with 1 Compute Unit, you can scrape around 160 pages.
 
 ## Documentation reference
 
