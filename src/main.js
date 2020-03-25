@@ -86,7 +86,9 @@ Apify.main(async () => {
             // log.info(`Pending URLs: ${requestQueue.pendingCount}`);
 
             // Scrape items from enqueued pages
-            await scrapeDetailsPage(page, results);
+            if (request.userData.detailPage) {
+                await scrapeDetailsPage(page, results);
+            }
         },
         maxRequestsPerCrawl: 0,
         maxRequestRetries: 1,

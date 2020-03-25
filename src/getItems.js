@@ -38,7 +38,7 @@ async function scrapeDetailsPage(pageObj, resultsArr) {
     // Go to page 2 and scrape
     let nextPage;
     try {
-        nextPage = await pageObj.waitFor('li.a-last > a', { timeout: 0 });
+        nextPage = await pageObj.waitFor('li.a-last > a');
     } catch (e) {
         log.error(`Could not extract second page - only one page returned. ${e}`);
     }
