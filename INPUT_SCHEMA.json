@@ -26,6 +26,12 @@
                 "amazon.it"
             ]
         },
+        "categoryUrls": {
+            "title": "Category Urls",
+            "type": "array",
+            "description": "Choose specific categories to scrape. Example URL: https://www.amazon.com/Best-Sellers-Automotive/zgbs/automotive. If this field is empty, top level results are chosen",
+            "editor": "requestListSources"
+        },
         "depthOfCrawl": {
             "title": "Depth of crawl",
             "type": "integer",

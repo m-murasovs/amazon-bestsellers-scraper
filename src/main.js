@@ -6,15 +6,26 @@ const { scrapeDetailsPage } = require('./getItems.js');
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
+
+    const { proxy, domain, categoryUrls ,depthOfCrawl } = input;
     // Select which domain to scrape
-    await requestQueue.addRequest({ url: input.domain });
+    if (categoryUrls && categoryUrls.length > 0) {
+        for (const categoryRequest of categoryUrls) {
+            await requestQueue.addRequest({ url: categoryRequest.url, userData: { detailPage: true, depthOfCrawl: 1 }}); // we it is not detail but it is how it was :)
+        }
+    } else {
+        await requestQueue.addRequest({ url: domain });
+    }
+
+    const proxyConfiguration = await Apify.createProxyConfiguration(proxy);
 
     const crawler = new Apify.PuppeteerCrawler({
         requestQueue,
+        proxyConfiguration,
         launchPuppeteerOptions: {
             headless: true,
             stealth: true,
-            useChrome: true,
+            useChrome: false,
             stealthOptions: {
                 addPlugins: false,
                 emulateWindowFrame: false,
@@ -31,7 +42,8 @@ Apify.main(async () => {
         handlePageFunction: async ({ request, page }) => {
             // get and log category name
             const title = await page.title();
-            log.info(`Processing: ${title}. URL: ${request.url}`);
+            log.info(`Processing: ${title}. Depth: ${request.userData.depthOfCrawl},`
+                + `is detail page: ${request.userData.detailPage} URL: ${request.url}`);
 
             const results = {
                 category: title,
@@ -54,7 +66,7 @@ Apify.main(async () => {
             }
 
             // Enqueue second subcategory level
-            if (input.depthOfCrawl === 2 && request.userData.depthOfCrawl === 1) {
+            if (depthOfCrawl > 1 && request.userData.depthOfCrawl === 1) {
                 await enqueueLinks({
                     page,
                     requestQueue,
@@ -69,7 +81,7 @@ Apify.main(async () => {
 
             // ADD IN CASE MORE DATA IS NEEDED (ADDING 3RD SUBCATEGORY LEVEL)
             // // Enqueue 3rd subcategory level
-            // if (input.depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
+            // if (depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
             //     await enqueueLinks({
             //         page,
             //         requestQueue,
