@@ -7,7 +7,7 @@ Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
 
-    const { proxy, domain, categoryUrls ,depthOfCrawl } = input;
+    const { proxy, domain, categoryUrls, depthOfCrawl } = input;
     // Select which domain to scrape
     if (categoryUrls && categoryUrls.length > 0) {
         for (const categoryRequest of categoryUrls) {
@@ -20,6 +20,8 @@ Apify.main(async () => {
     const proxyConfiguration = await Apify.createProxyConfiguration(proxy);
 
     const crawler = new Apify.PuppeteerCrawler({
+        maxRequestRetries: 15,
+        maxConcurrency: 10, // To prevent too many browser activity
         requestQueue,
         proxyConfiguration,
         launchPuppeteerOptions: {
@@ -102,8 +104,6 @@ Apify.main(async () => {
                 await scrapeDetailsPage(page, results);
             }
         },
-        maxRequestsPerCrawl: 0,
-        maxRequestRetries: 1,
     });
 
     await crawler.run();
