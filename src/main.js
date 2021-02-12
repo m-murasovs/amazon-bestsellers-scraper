@@ -1,4 +1,5 @@
 const Apify = require('apify');
+const cheerio = require('cheerio');
 
 const { log, enqueueLinks } = Apify.utils;
 const { scrapeDetailsPage } = require('./getItems.js');
@@ -24,6 +25,7 @@ Apify.main(async () => {
         maxConcurrency: 10, // To prevent too many browser activity
         requestQueue,
         proxyConfiguration,
+        useSessionPool: true,
         launchPuppeteerOptions: {
             headless: true,
             stealth: true,
@@ -41,9 +43,10 @@ Apify.main(async () => {
                 mockDeviceMemory: false,
             },
         },
-        handlePageFunction: async ({ request, page }) => {
+        handlePageFunction: async ({ request, page, response, session }) => {
             // get and log category name
             const title = await page.title();
+            const statusCode = await response.status();
             log.info(`Processing: ${title}. Depth: ${request.userData.depthOfCrawl},`
                 + `is detail page: ${request.userData.detailPage} URL: ${request.url}`);
 
@@ -52,6 +55,26 @@ Apify.main(async () => {
                 categoryUrl: request.url,
                 items: [],
             };
+
+            // Loading cheerio for easy parsing, remove if you wish
+            const html = await page.content();
+            const $ = cheerio.load(html);
+
+            // We handle this separately to get info
+            if ($('[action="/errors/validateCaptcha"]').length > 0) {
+                session.retire();
+                throw `[CAPTCHA]: Status Code: ${response.statusCode}`;
+            }
+
+            if (html.toLowerCase().includes('robot check')) {
+                session.retire();
+                throw `[ROBOT CHECK]: Status Code: ${response.statusCode}.`;
+            }
+
+            if (!response || (statusCode !== 200 && statusCode !== 404)) {
+                session.retire();
+                throw `[Status code: ${statusCode}]. Retrying`;
+            }
 
             // Enqueue main category pages on the Best Sellers homepage
             if (!request.userData.detailPage) {
