@@ -12,7 +12,10 @@ Apify.main(async () => {
     // Select which domain to scrape
     if (categoryUrls && categoryUrls.length > 0) {
         for (const categoryRequest of categoryUrls) {
-            await requestQueue.addRequest({ url: categoryRequest.url, userData: { detailPage: true, depthOfCrawl: 1 }}); // we it is not detail but it is how it was :)
+            await requestQueue.addRequest({
+                url: categoryRequest.url,
+                userData: { detailPage: true, depthOfCrawl: 1 },
+            }); // we it is not detail but it is how it was :)
         }
     } else {
         await requestQueue.addRequest({ url: domain });
@@ -50,11 +53,7 @@ Apify.main(async () => {
             log.info(`Processing: ${title}. Depth: ${request.userData.depthOfCrawl},`
                 + `is detail page: ${request.userData.detailPage} URL: ${request.url}`);
 
-            const results = {
-                category: title,
-                categoryUrl: request.url,
-                items: [],
-            };
+            const pageData = { category: title, categoryUrl: request.url };
 
             // Loading cheerio for easy parsing, remove if you wish
             const html = await page.content();
@@ -124,7 +123,7 @@ Apify.main(async () => {
 
             // Scrape items from enqueued pages
             if (request.userData.detailPage) {
-                await scrapeDetailsPage(page, results);
+                await scrapeDetailsPage(page, pageData);
             }
         },
     });
