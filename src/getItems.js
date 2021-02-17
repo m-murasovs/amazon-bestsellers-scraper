@@ -2,7 +2,7 @@ const Apify = require('apify');
 
 const { log } = Apify.utils;
 
-async function getItems(pageObj, resultsArr) {
+async function getItems(pageObj, pageData, resultsArr) {
     // Scrape all items that match the selector
     const itemsObj = await pageObj.$$eval('div.p13n-sc-truncated', prods => prods.map(prod => prod.innerHTML));
 
@@ -22,8 +22,9 @@ async function getItems(pageObj, resultsArr) {
 
     // Add scraped items to results array
     for (let i = 0; i < Object.keys(itemsObj).length; i++) {
-        resultsArr.items.push({
-            ID: resultsArr.items.length,
+        resultsArr.push({
+            ...pageData,
+            ID: resultsArr.length,
             name: itemsObj[i],
             price: pricesObj[i],
             url: urlsArr[i],
@@ -32,9 +33,10 @@ async function getItems(pageObj, resultsArr) {
     }
 }
 
-async function scrapeDetailsPage(pageObj, resultsArr) {
+async function scrapeDetailsPage(pageObj, pageData) {
+    const resultsArr = [];
     // Scrape page 1
-    await getItems(pageObj, resultsArr);
+    await getItems(pageObj, pageData, resultsArr);
     // Go to page 2 and scrape
     let nextPage;
     try {
@@ -45,7 +47,7 @@ async function scrapeDetailsPage(pageObj, resultsArr) {
     if (nextPage) {
         await nextPage.click();
         await pageObj.waitForNavigation();
-        await getItems(pageObj, resultsArr);
+        await getItems(pageObj, pageData, resultsArr);
         await Apify.pushData(resultsArr);
         log.info(`Saving results from ${await pageObj.title()}`);
     }
