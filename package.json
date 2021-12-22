@@ -4,7 +4,8 @@
     "description": "Automatically extract the top selling items across all main categories.",
     "dependencies": {
         "@types/cheerio": "^0.22.24",
-        "apify": "^0.22.4",
+        "apify": "^2.2.0",
+        "puppeteer": "*",
         "cheerio": "^1.0.0-rc.5"
     },
     "devDependencies": {

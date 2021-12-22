@@ -25,27 +25,11 @@ Apify.main(async () => {
 
     const crawler = new Apify.PuppeteerCrawler({
         maxRequestRetries: 15,
-        maxConcurrency: 10, // To prevent too many browser activity
+        maxConcurrency: 10,
         requestQueue,
+        navigationTimeoutSecs: 120,
         proxyConfiguration,
         useSessionPool: true,
-        launchPuppeteerOptions: {
-            headless: true,
-            stealth: true,
-            useChrome: false,
-            stealthOptions: {
-                addPlugins: false,
-                emulateWindowFrame: false,
-                emulateWebGL: false,
-                emulateConsoleDebug: false,
-                addLanguage: false,
-                hideWebDriver: true,
-                hackPermissions: false,
-                mockChrome: false,
-                mockChromeInIframe: false,
-                mockDeviceMemory: false,
-            },
-        },
         handlePageFunction: async ({ request, page, response, session }) => {
             // get and log category name
             const title = await page.title();
@@ -58,11 +42,16 @@ Apify.main(async () => {
             // Loading cheerio for easy parsing, remove if you wish
             const html = await page.content();
             const $ = cheerio.load(html);
-
+            let type = 'OLD';
             // We handle this separately to get info
             if ($('[action="/errors/validateCaptcha"]').length > 0) {
                 session.retire();
                 throw `[CAPTCHA]: Status Code: ${response.statusCode}`;
+            }
+
+            if ($('.a-dynamic-image').length > 0) {
+                console.log('New Selectors Detected');
+                type = 'NEW';
             }
 
             if (html.toLowerCase().includes('robot check')) {
@@ -123,7 +112,7 @@ Apify.main(async () => {
 
             // Scrape items from enqueued pages
             if (request.userData.detailPage) {
-                await scrapeDetailsPage(page, pageData);
+                await scrapeDetailsPage(page, pageData, type);
             }
         },
     });
