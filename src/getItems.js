@@ -7,6 +7,7 @@ async function getItems(pageObj, pageData, resultsArr, type) {
     if (type === 'NEW') {
         // need to wait after page 1
         await pageObj.waitForSelector('.zg-grid-general-faceout');
+        // 5 seconds goes right to the next page button, if you remove t/o secs and scroll to bottom you will miss the content
         await Apify.utils.puppeteer.infiniteScroll(pageObj, { timeoutSecs: 5 });
         const allItems = await pageObj.$$('.zg-grid-general-faceout');
 
