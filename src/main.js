@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 
 const { log, enqueueLinks } = Apify.utils;
 const { scrapeDetailsPage } = require('./getItems.js');
+const { LABEL } = require('./consts');
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
@@ -42,7 +43,7 @@ Apify.main(async () => {
             // Loading cheerio for easy parsing, remove if you wish
             const html = await page.content();
             const $ = cheerio.load(html);
-            let type = 'OLD';
+            let label = LABEL.OLD;
             // We handle this separately to get info
             if ($('[action="/errors/validateCaptcha"]').length > 0) {
                 session.retire();
@@ -51,7 +52,7 @@ Apify.main(async () => {
 
             if ($('.a-dynamic-image').length > 0) {
                 console.log('New Selectors Detected');
-                type = 'NEW';
+                label = LABEL.NEW;
             }
 
             if (html.toLowerCase().includes('robot check')) {
@@ -112,7 +113,7 @@ Apify.main(async () => {
 
             // Scrape items from enqueued pages
             if (request.userData.detailPage) {
-                await scrapeDetailsPage(page, pageData, type);
+                await scrapeDetailsPage(page, pageData, label);
             }
         },
     });
