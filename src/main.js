@@ -31,6 +31,12 @@ Apify.main(async () => {
         navigationTimeoutSecs: 120,
         handlePageTimeoutSecs: 180,
         proxyConfiguration,
+        launchContext: {
+            useChrome: true,
+            launchOptions: {
+                headless: false,
+            },
+        },
         useSessionPool: true,
         handlePageFunction: async ({ request, page, response, session }) => {
             // get and log category name
