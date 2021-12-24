@@ -29,6 +29,7 @@ Apify.main(async () => {
         maxConcurrency: 10,
         requestQueue,
         navigationTimeoutSecs: 120,
+        handlePageTimeoutSecs: 180,
         proxyConfiguration,
         useSessionPool: true,
         handlePageFunction: async ({ request, page, response, session }) => {
