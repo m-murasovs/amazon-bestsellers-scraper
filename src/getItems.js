@@ -8,7 +8,7 @@ async function getItems(pageObj, pageData, resultsArr, label) {
     if (label === LABEL.NEW) {
         // need to wait after page 1
         await pageObj.waitForSelector('.zg-grid-general-faceout');
-        // 5 seconds goes right to the next page button, if you remove t/o secs and scroll to bottom you will miss the content
+
         await Apify.utils.puppeteer.infiniteScroll(pageObj, { scrollDownAndUp: true, timeoutSecs: 2, waitForSecs: 10 });
         await Apify.utils.puppeteer.infiniteScroll(pageObj, { scrollDownAndUp: true, timeoutSecs: 6, waitForSecs: 10 });
 
