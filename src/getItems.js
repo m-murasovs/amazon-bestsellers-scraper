@@ -9,8 +9,10 @@ async function getItems(pageObj, pageData, resultsArr, label) {
         // need to wait after page 1
         await pageObj.waitForSelector('.zg-grid-general-faceout');
 
-        await Apify.utils.puppeteer.infiniteScroll(pageObj, { scrollDownAndUp: true, timeoutSecs: 2, waitForSecs: 10 });
-        await Apify.utils.puppeteer.infiniteScroll(pageObj, { scrollDownAndUp: true, timeoutSecs: 6, waitForSecs: 10 });
+        for (let i = 1; i < 5; i++) {
+            await Apify.utils.puppeteer.infiniteScroll(pageObj, { scrollDownAndUp: true, timeoutSecs: i, waitForSecs: 5 });
+            await pageObj.waitForTimeout(5000)
+        }
 
         const allItems = await pageObj.$$('.zg-grid-general-faceout');
 
