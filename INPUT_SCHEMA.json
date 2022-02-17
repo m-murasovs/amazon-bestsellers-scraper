@@ -49,7 +49,9 @@
             "prefill": {
                 "useApifyProxy": true
             },
-            "editor": "proxy"
+            "editor": "proxy",
+            "sectionCaption": "For developers"
         }
-    }
+    },
+    "required": ["proxy"]
 }
