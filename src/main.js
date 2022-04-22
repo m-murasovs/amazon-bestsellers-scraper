@@ -37,6 +37,12 @@ Apify.main(async () => {
                 headless: false,
             },
         },
+        preNavigationHooks: [
+            async (_, gotoOptions) => {
+                // default is sometimes super slow & times out while navigating, domcontentloaded seems to be enough
+                gotoOptions.waitUntil = 'domcontentloaded';
+            },
+        ],
         useSessionPool: true,
         handlePageFunction: async ({ request, page, response, session }) => {
             // get and log category name
