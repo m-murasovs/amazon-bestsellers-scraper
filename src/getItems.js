@@ -11,7 +11,7 @@ async function getItems(pageObj, pageData, resultsArr, label) {
 
         for (let i = 1; i < 5; i++) {
             await Apify.utils.puppeteer.infiniteScroll(pageObj, { scrollDownAndUp: true, timeoutSecs: i, waitForSecs: 5 });
-            await pageObj.waitForTimeout(5000)
+            await pageObj.waitForTimeout(5000);
         }
 
         const allItems = await pageObj.$$('.zg-grid-general-faceout');
@@ -25,7 +25,9 @@ async function getItems(pageObj, pageData, resultsArr, label) {
             const priceExists = (await item.$('.a-color-price')) || null;
             obj.price = priceExists ? await item.$eval('.a-color-price', el => el.innerText) : null;
             obj.url = await item.$eval('div > a.a-link-normal:nth-of-type(1)', url => url.href);
-            obj.thumbnail = await item.$eval('div[class*="_p13n-zg-list-grid-desktop_maskStyle"] > img', url => url.src);
+            // p13n-sc-dynamic-image
+            // const thumbSelector = await item.$('div[class*="_p13n-sc-dynamic-image"]') || await item.$('div[class*="_p13n-zg-list-grid-desktop_maskStyle"] > img') || '';
+            obj.thumbnail = await item.$eval('img', url => url.src);
             resultsArr.push(obj);
         }
         return;
