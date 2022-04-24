@@ -5,9 +5,7 @@ const { VALID_URL_SUBSTRINGS } = require('./consts');
 
 const { utils: { enqueueLinks } } = Apify;
 
-function validateInput(input) {
-    const { domain, categoryUrls } = input;
-
+function validateStartUrls(domain, categoryUrls) {
     const allUrls = [
         domain,
         ...categoryUrls.map(({url}) => url),
@@ -142,11 +140,16 @@ const parseCurrency = (priceText) => {
     return currency;
 };
 
+function injectItemPositions(results, offset = 0) {
+    return results.map((result, i) => ({ position: i + 1 + offset, ...result }));
+}
+
 module.exports = {
-    validateInput,
+    validateStartUrls,
     validateLoadedPage,
     initializeRequestQueue,
     enqueueNextCategoryLevel,
     parsePrice,
     parseCurrency,
+    injectItemPositions,
 };

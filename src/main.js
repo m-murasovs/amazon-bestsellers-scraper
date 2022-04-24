@@ -3,13 +3,17 @@ const cheerio = require('cheerio');
 
 const { LABEL } = require('./consts');
 const { handleHomepage, handleDetailPage } = require('./routes.js');
-const { validateLoadedPage, initializeRequestQueue, enqueueNextCategoryLevel, validateInput } = require('./utils');
+const {
+    validateLoadedPage,
+    initializeRequestQueue,
+    enqueueNextCategoryLevel,
+    validateStartUrls
+} = require('./utils');
 
 const { utils: { log } } = Apify;
 
 Apify.main(async () => {
     const input = await Apify.getValue('INPUT');
-    validateInput(input);
 
     const {
         proxy,
@@ -17,6 +21,8 @@ Apify.main(async () => {
         categoryUrls = [],
         depthOfCrawl: desiredDepth = 1
     } = input;
+
+    validateStartUrls(domain, categoryUrls);
 
     const requestQueue = await initializeRequestQueue(categoryUrls, domain, desiredDepth);
     const proxyConfiguration = await Apify.createProxyConfiguration(proxy);

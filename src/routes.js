@@ -1,6 +1,7 @@
 const Apify = require('apify');
 const { LABEL } = require('./consts');
 const { getItems } = require('./getItems');
+const { injectItemPositions } = require('./utils');
 
 const { utils: { log, puppeteer, enqueueLinks } } = Apify;
 
@@ -24,8 +25,6 @@ async function handleHomepage(page, requestQueue) {
  * Scrapes items from from detail page and saves them into the dataset.
  */
  async function handleDetailPage(page, pageData, label) {
-    const resultsArr = [];
-
     if (label === LABEL.NEW) {
         log.info('New Selectors Detected');
     }
@@ -34,7 +33,7 @@ async function handleHomepage(page, requestQueue) {
 
     // Scrape page 1
     const firstPageResults = await getItems(page, pageData, label);
-    resultsArr.push(...firstPageResults);
+    await Apify.pushData(injectItemPositions(firstPageResults));
 
     // Go to page 2 and scrape
     let nextPage;
@@ -49,12 +48,10 @@ async function handleHomepage(page, requestQueue) {
         await page.waitForNavigation();
 
         const secondPageResults = await getItems(page, pageData, label);
-        resultsArr.push(...secondPageResults);
+        const positionOffset = firstPageResults.length;
+        await Apify.pushData(injectItemPositions(secondPageResults, positionOffset));
     }
 
-    const results = resultsArr.map((result, i) => ({ position: i + 1, ...result }));
-
-    await Apify.pushData(results);
     log.info(`Saved results from: ${await page.title()}`);
 }
 
