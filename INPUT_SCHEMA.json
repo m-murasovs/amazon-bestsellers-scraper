@@ -6,7 +6,7 @@
         "domain": {
             "title": "Domain",
             "type": "string",
-            "description": "Select the URL of the Amazon Best Sellers page you want to extract.",
+            "description": "Select the URL of the Amazon Best Sellers page you want to extract. The value is ignored if 'categoryUrls' is specified instead",
             "editor": "select",
             "default": "https://www.amazon.com/Best-Sellers/zgbs",
             "enum": [
@@ -29,8 +29,13 @@
         "categoryUrls": {
             "title": "Category Urls",
             "type": "array",
-            "description": "Choose specific categories to scrape. Example URL: https://www.amazon.com/Best-Sellers-Automotive/zgbs/automotive. If this field is empty, top level results are chosen",
-            "editor": "requestListSources"
+            "description": "Choose specific categories to scrape. If this field is empty, top level results are chosen.",
+            "editor": "requestListSources",
+            "prefill": [
+                {
+                    "url": "https://www.amazon.com/Best-Sellers-Electronics/zgbs/electronics/"
+                }
+            ]
         },
         "depthOfCrawl": {
             "title": "Depth of crawl",
@@ -47,6 +52,9 @@
             "type": "object",
             "description": "Select proxies to be used by your crawler. For more information, visit https://docs.apify.com/proxy",
             "prefill": {
+                "useApifyProxy": true
+            },
+            "default": {
                 "useApifyProxy": true
             },
             "editor": "proxy",
