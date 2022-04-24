@@ -8,8 +8,8 @@ const { utils: { enqueueLinks } } = Apify;
 function validateStartUrls(domain, categoryUrls) {
     const allUrls = [
         domain,
-        ...categoryUrls.map(({url}) => url),
-    ];
+        ...categoryUrls.map(({ url }) => url),
+    ].filter((url) => url);
 
     allUrls.forEach(( url ) => {
         let containsRequiredSubstring = false;
