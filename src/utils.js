@@ -1,7 +1,32 @@
 const Apify = require('apify');
 const cheerio = require('cheerio');
 
+const { VALID_URL_SUBSTRINGS } = require('./consts');
+
 const { utils: { enqueueLinks } } = Apify;
+
+function validateInput(input) {
+    const { domain, categoryUrls } = input;
+
+    const allUrls = [
+        domain,
+        ...categoryUrls.map(({url}) => url),
+    ];
+
+    allUrls.forEach(( url ) => {
+        let containsRequiredSubstring = false;
+
+        VALID_URL_SUBSTRINGS.forEach((substring) => {
+            if (url.includes(substring)) {
+                containsRequiredSubstring = true;
+            }
+        });
+
+        if (!containsRequiredSubstring) {
+            throw new Error(`Invalid start url without 'bestsellers' or 'Best-Sellers' keyword included: ${url}`);
+        }
+    })
+}
 
 /**
  * Retires session and throws an error if an invalid page was loaded.
@@ -52,7 +77,17 @@ async function enqueueNextCategoryLevel(page, requestQueue, nextDepthOfCrawl) {
     await enqueueLinks({
         page,
         requestQueue,
+
+        /**
+         * This selector targets subcategories on the same hierarchy level as well
+         * (e.g. 'Home Cinema, TV & Video' and 'TVs' categories are on the same level
+         * under the 'Electronics & Photo' but 'TVs' category is also under the 'Home Cinema, TV & Video').
+         * The requestQueue ensures that all categories will only be enqueued once.
+         * We won't break subcategory hierarchy by doing this - once we've navigated into a subcategory,
+         * we want to crawl all subcategories on the same level.
+         */
         selector: '[role="group"] [role="treeitem"] a',
+
         transformRequestFunction: (req) => {
             req.userData.detailPage = true;
             req.userData.depthOfCrawl = nextDepthOfCrawl;
@@ -72,8 +107,15 @@ const parsePrice = (priceText) => {
         ? priceText.replace(',', '.')
         : priceText;
 
+    // matches starting price from '€25.12 - €111.83' format
+    const REPLACE_SECOND_PRICE_REGEX = /( ?- ?).+/g;
     const REPLACE_NON_NUMBER_REGEX = /[^\d.]+/g;
-    const price = Number(enPriceFormat.replace(REPLACE_NON_NUMBER_REGEX, ''));
+
+    const normalizedPriceText = enPriceFormat
+        .replace(REPLACE_SECOND_PRICE_REGEX, '')
+        .replace(REPLACE_NON_NUMBER_REGEX, '');
+
+    const price = Number(normalizedPriceText);
 
     return price;
 };
@@ -101,6 +143,7 @@ const parseCurrency = (priceText) => {
 };
 
 module.exports = {
+    validateInput,
     validateLoadedPage,
     initializeRequestQueue,
     enqueueNextCategoryLevel,

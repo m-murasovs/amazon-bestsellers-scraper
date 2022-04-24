@@ -3,12 +3,14 @@ const cheerio = require('cheerio');
 
 const { LABEL } = require('./consts');
 const { handleHomepage, handleDetailPage } = require('./routes.js');
-const { validateLoadedPage, initializeRequestQueue, enqueueNextCategoryLevel } = require('./utils');
+const { validateLoadedPage, initializeRequestQueue, enqueueNextCategoryLevel, validateInput } = require('./utils');
 
 const { utils: { log } } = Apify;
 
 Apify.main(async () => {
     const input = await Apify.getValue('INPUT');
+    validateInput(input);
+
     const {
         proxy,
         domain,
