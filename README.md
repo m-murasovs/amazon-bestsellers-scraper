@@ -9,7 +9,7 @@ If you would prefer a more general Amazon product or data scraper, you should tr
 If you're web scraping Amazon for retail or market research, the Amazon [Best Sellers list](https://www.amazon.com/gp/help/customer/display.html?nodeId=525376) features the top-selling items across Amazon, which can tell you a lot about the top trends in [e-commerce](https://apify.com/industries/ecommerce-and-retail). Competing directly against these products can be difficult, but the Best Sellers list can be a source of inspiration for new products and help e-commerce retailers [stay ahead of the competition](https://apify.com/use-cases/price-comparison). Getting your item into the Best Sellers list and keeping it there is one of the surest ways to guarantee sales for your business. Once a product reaches the Best Sellers list, e-commerce retailers increasingly turn to [web scraping](https://apify.com/apify/web-scraper) to track up-and-coming products, and adjust their own products to compete.
 
 ## How much will it cost me to scrape Amazon Best Sellers?
-For every 100 pages scraped, the actor will consume 0.6 compute units. This means that you can scrape around **160 pages** for 1 compute unit. That will cost you just **25 cents**. 
+For every 100 pages scraped, the actor will consume 0.6 compute units. This means that you can scrape around **160 pages** for 1 compute unit. That will cost you just **25 cents**.
 
 ## Input settings
 -   Domain you want to extract
@@ -30,7 +30,7 @@ The following table lists the available options of the proxy configuration setti
 
 **None**: The scraper will not use any proxies. All web pages will be loaded directly from IP addresses of Apify servers running on Amazon Web Services.
 
-**Apify Proxy** **(automatic)**: 
+**Apify Proxy** **(automatic)**:
 The scraper will load all web pages using [Apify Proxy](https://apify.com/proxy) in automatic mode. In this mode, the proxy uses all proxy groups that are available to the user, and for each new web page it automatically selects the proxy that hasn't been used in the longest time for the specific hostname, in order to reduce the chance of detection by the website. You can view the list of available proxy groups on the [proxy](https://my.apify.com/proxy) page in the app.
 
 **Apify Proxy** **(selected groups)**: The scraper will load all web pages using [Apify Proxy](https://apify.com/proxy) with specific groups of target proxy servers.
@@ -44,29 +44,17 @@ The API will return results like this (in JSON format):
 
 ```json
 {
-
-"category":  "Amazon.co.uk Best Sellers: The most popular items in Books",
-
-"categoryUrl":  "https://www.amazon.co.uk/Best-Sellers-Books/zgbs/books/ref=zg_bs_nav_0/261-6986927-7102013",
-
-"items":  {
-
-"0":  {
-
-"name":  "The Mirror and the Light (The Wolf Hall Trilogy)",
-
-"price":  "£15.49",
-
-"url":  "https://www.amazon.co.uk/Mirror-Light-Wolf-Hall-Trilogy/dp/0007480997/ref=zg_bs_books_1?_encoding=UTF8&psc=1&refRID=3PNZSWBH3A0H1QCWYPP6",
-
-"thumbnail":  "https://images-eu.ssl-images-amazon.com/images/I/91-UvTTh4lL._AC_UL200_SR200,200_.jpg"
-
-},
-
+    "category": "Amazon.co.uk Best Sellers: The most popular items in Books",
+    "categoryUrl": "https://www.amazon.co.uk/Best-Sellers-Books/zgbs/books/ref=zg_bs_nav_0/261-6986927-7102013",
+    "items": {
+        "0": {
+            "name":  "The Mirror and the Light (The Wolf Hall Trilogy)",
+            "price":  "£15.49",
+            "url":  "https://www.amazon.co.uk/Mirror-Light-Wolf-Hall-Trilogy/dp/0007480997/ref=zg_bs_books_1?_encoding=UTF8&psc=1&refRID=3PNZSWBH3A0H1QCWYPP6",
+            "thumbnail":  "https://images-eu.ssl-images-amazon.com/images/I/91-UvTTh4lL._AC_UL200_SR200,200_.jpg"
+        }
+    }
 }
-
-}
-
 ```
 
 The results can be downloaded using [get dataset items](https://www.apify.com/docs/api/v2#/reference/datasets/item-collection/get-items)
