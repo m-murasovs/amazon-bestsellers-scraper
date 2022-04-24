@@ -1,130 +1,81 @@
 const Apify = require('apify');
 const cheerio = require('cheerio');
 
-const { log, enqueueLinks } = Apify.utils;
-const { scrapeDetailsPage } = require('./getItems.js');
 const { LABEL } = require('./consts');
+const { handleHomepage, handleDetailPage } = require('./routes.js');
+const { validateLoadedPage, initializeRequestQueue, enqueueNextCategoryLevel } = require('./utils');
+
+const { utils: { log } } = Apify;
 
 Apify.main(async () => {
-    const requestQueue = await Apify.openRequestQueue();
     const input = await Apify.getValue('INPUT');
+    const {
+        proxy,
+        domain,
+        categoryUrls = [],
+        depthOfCrawl: desiredDepth = 1
+    } = input;
 
-    const { proxy, domain, categoryUrls, depthOfCrawl } = input;
-    // Select which domain to scrape
-    if (categoryUrls && categoryUrls.length > 0) {
-        for (const categoryRequest of categoryUrls) {
-            await requestQueue.addRequest({
-                url: categoryRequest.url,
-                userData: { detailPage: true, depthOfCrawl: 1 },
-            }); // we it is not detail but it is how it was :)
-        }
-    } else {
-        await requestQueue.addRequest({ url: domain });
-    }
-
+    const requestQueue = await initializeRequestQueue(categoryUrls, domain, desiredDepth);
     const proxyConfiguration = await Apify.createProxyConfiguration(proxy);
 
     const crawler = new Apify.PuppeteerCrawler({
         maxRequestRetries: 15,
         maxConcurrency: 10,
         requestQueue,
-        navigationTimeoutSecs: 120,
+        navigationTimeoutSecs: 240,
         handlePageTimeoutSecs: 180,
         proxyConfiguration,
+        browserPoolOptions: {
+            useFingerprints: true,
+        },
         launchContext: {
             useChrome: true,
             launchOptions: {
                 headless: false,
             },
         },
+        preNavigationHooks: [
+            async (_, gotoOptions) => {
+                // default is sometimes super slow & times out while navigating, domcontentloaded seems to be enough
+                gotoOptions.waitUntil = 'domcontentloaded';
+            },
+        ],
         useSessionPool: true,
-        handlePageFunction: async ({ request, page, response, session }) => {
-            // get and log category name
+        handlePageFunction: async (context) => {
+            const { page, request: { url, userData }, response, session } = context;
+            const { detailPage, currentDepth, desiredDepth } = userData;
+
             const title = await page.title();
-            const statusCode = await response.status();
-            log.info(`Processing: ${title}. Depth: ${request.userData.depthOfCrawl},`
-                + `is detail page: ${request.userData.detailPage} URL: ${request.url}`);
-
-            const pageData = { category: title, categoryUrl: request.url };
-
-            // Loading cheerio for easy parsing, remove if you wish
             const html = await page.content();
             const $ = cheerio.load(html);
-            let label = LABEL.OLD;
-            // We handle this separately to get info
-            if ($('[action="/errors/validateCaptcha"]').length > 0) {
-                session.retire();
-                throw `[CAPTCHA]: Status Code: ${response.statusCode}`;
+
+            await validateLoadedPage(response, session, html);
+
+            log.info(`Processing: ${title}`, { url, detailPage, currentDepth });
+
+            // Handle homepage or bestseller's detail page
+            if (detailPage) {
+                const pageData = { category: title, categoryUrl: url };
+                const label = $('.a-dynamic-image').length > 0 ? LABEL.NEW : LABEL.OLD;
+
+                await handleDetailPage(page, pageData, label);
+            } else {
+                await handleHomepage(page, requestQueue);
             }
 
-            if ($('.a-dynamic-image').length > 0) {
-                console.log('New Selectors Detected');
-                label = LABEL.NEW;
+            // Enqueue next subcategory level
+            if (currentDepth < desiredDepth) {
+                log.info(`Enqueuing next category level of depth ${currentDepth + 1}`);
+                await enqueueNextCategoryLevel(page, requestQueue, currentDepth + 1);
             }
-
-            if (html.toLowerCase().includes('robot check')) {
-                session.retire();
-                throw `[ROBOT CHECK]: Status Code: ${response.statusCode}.`;
-            }
-
-            if (!response || (statusCode !== 200 && statusCode !== 404)) {
-                session.retire();
-                throw `[Status code: ${statusCode}]. Retrying`;
-            }
-
-            // Enqueue main category pages on the Best Sellers homepage
-            if (!request.userData.detailPage) {
-                await enqueueLinks({
-                    page,
-                    requestQueue,
-                    selector: 'div > ul > ul > li > a',
-                    transformRequestFunction: (req) => {
-                        req.userData.detailPage = true;
-                        req.userData.depthOfCrawl = 1;
-                        return req;
-                    },
-                });
-            }
-
-            // Enqueue second subcategory level
-            if (depthOfCrawl > 1 && request.userData.depthOfCrawl === 1) {
-                await enqueueLinks({
-                    page,
-                    requestQueue,
-                    selector: 'ul > ul > ul > li > a',
-                    transformRequestFunction: (req) => {
-                        req.userData.detailPage = true;
-                        req.userData.depthOfCrawl = 2;
-                        return req;
-                    },
-                });
-            }
-
-            // ADD IN CASE MORE DATA IS NEEDED (ADDING 3RD SUBCATEGORY LEVEL)
-            // // Enqueue 3rd subcategory level
-            // if (depthOfCrawl === 3 && request.userData.depthOfCrawl === 2) {
-            //     await enqueueLinks({
-            //         page,
-            //         requestQueue,
-            //         selector: 'ul > ul > ul > li > a',
-            //         transformRequestFunction: (req) => {
-            //             req.userData.detailPage = true;
-            //             req.userData.depthOfCrawl = 3;
-            //             return req;
-            //         },
-            //     });
-            // }
 
             // Log number of pending URLs (works only locally)
             // log.info(`Pending URLs: ${requestQueue.pendingCount}`);
-
-            // Scrape items from enqueued pages
-            if (request.userData.detailPage) {
-                await scrapeDetailsPage(page, pageData, label);
-            }
         },
     });
 
+    log.info('Starting the crawl...');
     await crawler.run();
-    log.info('Crawl complete.');
+    log.info('Crawl finished');
 });
