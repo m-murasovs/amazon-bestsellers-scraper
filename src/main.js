@@ -7,7 +7,7 @@ const { LABEL } = require('./consts');
 
 Apify.main(async () => {
     const requestQueue = await Apify.openRequestQueue();
-    const input = await Apify.getValue('INPUT');
+    const input = await Apify.getInput();
 
     const { proxy, domain, categoryUrls, depthOfCrawl } = input;
     // Select which domain to scrape
@@ -32,18 +32,19 @@ Apify.main(async () => {
         handlePageTimeoutSecs: 180,
         proxyConfiguration,
         launchContext: {
-            useChrome: true,
+            useChrome: false,
             launchOptions: {
                 headless: false,
             },
         },
+        useSessionPool: true,
         preNavigationHooks: [
             async (_, gotoOptions) => {
                 // default is sometimes super slow & times out while navigating, domcontentloaded seems to be enough
                 gotoOptions.waitUntil = 'domcontentloaded';
+                gotoOptions.navigationTimeoutSecs = 60;
             },
         ],
-        useSessionPool: true,
         handlePageFunction: async ({ request, page, response, session }) => {
             // get and log category name
             const title = await page.title();
@@ -126,7 +127,7 @@ Apify.main(async () => {
 
             // Scrape items from enqueued pages
             if (request.userData.detailPage) {
-                await scrapeDetailsPage(page, pageData, label);
+                await scrapeDetailsPage(request, page, pageData, label);
             }
         },
     });
