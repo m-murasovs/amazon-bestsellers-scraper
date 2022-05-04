@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 const Apify = require('apify');
+const { load } = require('cheerio');
 
 const { puppeteer } = Apify.utils;
 const { LABEL } = require('./consts');
@@ -15,30 +16,28 @@ async function waitForNewPageToLoad(page, selector) {
     }
 }
 
-async function getNewPageDesignItems(page, pageData) {
+async function getNewPageDesignItems(request, page, pageData) {
     const ITEM_SELECTOR = '#gridItemRoot .zg-grid-general-faceout';
-
     await waitForNewPageToLoad(page, ITEM_SELECTOR);
-    const allItems = await page.$$(ITEM_SELECTOR);
+
+    const $ = load(await page.content());
 
     const resultItems = [];
 
-    for (const [_index, item] of allItems.entries()) {
+    $(ITEM_SELECTOR).each((_index, element) => {
         const obj = { ...pageData };
 
-        obj.name = await item.$eval('div > a:nth-child(2) > span > div', (el) => el.innerHTML);
+        obj.name = $(element).find('div > a:nth-child(2) > span > div').html();
 
         // format: '£8.99', sometimes with additional details
-        const soloPriceExists = (await item.$('.a-color-price')) || null;
-        const soloPriceText = soloPriceExists ? await item.$eval('.a-color-price', (el) => el.innerText) : null;
+        const soloPriceText = $(element).find('.a-color-price').text() || null;
 
         // format: '2 offers from £4.99', '.p13n-sc-price' selector targets £4.99 price only
-        const offersPriceExists = (await item.$('.p13n-sc-price')) || null;
-        const offersPriceText = offersPriceExists ? await item.$eval('.p13n-sc-price', (el) => el.innerText) : null;
+        const offersPriceText = $(element).find('.p13n-sc-price').text() || null;
 
         // format: '22 offers from £13.79', store 1 offer as default if no offers are mentioned explicitly
-        const offersText = offersPriceExists
-            ? await item.$eval('.a-link-normal span.a-color-secondary', (el) => el.innerText)
+        const offersText = offersPriceText
+            ? $(element).find('.a-link-normal span.a-color-secondary').text()
             : '1';
 
         const priceText = soloPriceText || offersPriceText;
@@ -47,30 +46,33 @@ async function getNewPageDesignItems(page, pageData) {
         obj.currency = parseCurrency(priceText);
         obj.numberOfOffers = parseInt(offersText, 10);
 
-        obj.url = await item.$eval('div > a.a-link-normal:nth-of-type(1)', (url) => url.href);
+        const foundUrl = $(element).find('div > a.a-link-normal:nth-of-type(1)').attr('href');
+        obj.url = foundUrl ? `https://${new URL(request.url).host}${foundUrl}` : null;
         // p13n-sc-dynamic-image
         // const thumbSelector = await item.$('div[class*="_p13n-sc-dynamic-image"]') || await item.$('div[class*="_p13n-zg-list-grid-desktop_maskStyle"] > img') || '';
-        obj.thumbnail = await item.$eval('img', (url) => url.src);
+        obj.thumbnail = $(element).find('img').attr('src');
 
         resultItems.push(obj);
-    }
+    });
 
     return resultItems;
 }
 
-async function getItems(page, pageData, label) {
+async function getItems(request, page, pageData, label) {
     if (label === LABEL.NEW) {
-        const items = await getNewPageDesignItems(page, pageData);
+        const items = await getNewPageDesignItems(request, page, pageData);
         return items;
     }
 
-    const itemsObj = await page.$$eval('div.p13n-sc-truncated', prods => prods.map((prod) => prod.innerHTML));
+    const $ = load(await page.content());
 
-    const pricesObj = await page.$$eval('span.p13n-sc-price', price => price.map((el) => el.innerHTML));
+    const itemsObj = $('div.p13n-sc-truncated').html();
 
-    const urlsObj = await page.$$eval('span.aok-inline-block > a.a-link-normal', (link) => link.map((url) => url.href));
+    const pricesObj = $('span.p13n-sc-price').html();
 
-    const imgsObj = await page.$$eval('a.a-link-normal > span > div.a-section > img', (link) => link.map((url) => url.src));
+    const urlsObj = $('span.aok-inline-block > a.a-link-normal').attr('href');
+
+    const imgsObj = $('a.a-link-normal > span > div.a-section > img').attr('src');
 
     // Get rid of duplicate URLs (couldn't avoid scraping them)
     const urlsArr = [...new Set(urlsObj)];

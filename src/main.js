@@ -13,7 +13,7 @@ const {
 const { utils: { log } } = Apify;
 
 Apify.main(async () => {
-    const input = await Apify.getValue('INPUT');
+    const input = await Apify.getInput();
 
     const {
         proxy,
@@ -38,22 +38,25 @@ Apify.main(async () => {
             useFingerprints: true,
         },
         launchContext: {
-            useChrome: true,
+            useChrome: false,
             launchOptions: {
                 headless: false,
             },
         },
+        useSessionPool: true,
         preNavigationHooks: [
             async (_, gotoOptions) => {
                 // default is sometimes super slow & times out while navigating, domcontentloaded seems to be enough
                 gotoOptions.waitUntil = 'domcontentloaded';
+                gotoOptions.navigationTimeoutSecs = 60;
             },
         ],
-        useSessionPool: true,
         handlePageFunction: async (context) => {
-            const { page, request: { url, userData }, response, session } = context;
+            const { page, request, response, session } = context;
+            const { url, userData } = request;
             const { detailPage, currentDepth, desiredDepth } = userData;
 
+            // get and log category name
             const title = await page.title();
             const html = await page.content();
             const $ = cheerio.load(html);
@@ -67,7 +70,7 @@ Apify.main(async () => {
                 const pageData = { category: title, categoryUrl: url };
                 const label = $('.a-dynamic-image').length > 0 ? LABEL.NEW : LABEL.OLD;
 
-                await handleDetailPage(page, pageData, label);
+                await handleDetailPage(request, page, pageData, label);
             } else {
                 await handleHomepage(page, requestQueue);
             }

@@ -24,7 +24,7 @@ async function handleHomepage(page, requestQueue) {
 /**
  * Scrapes items from from detail page and saves them into the dataset.
  */
- async function handleDetailPage(page, pageData, label) {
+ async function handleDetailPage(request, page, pageData, label) {
     if (label === LABEL.NEW) {
         log.info('New Selectors Detected');
     }
@@ -32,7 +32,7 @@ async function handleHomepage(page, requestQueue) {
     await puppeteer.injectJQuery(page);
 
     // Scrape page 1
-    const firstPageResults = await getItems(page, pageData, label);
+    const firstPageResults = await getItems(request, page, pageData, label);
     await Apify.pushData(injectItemPositions(firstPageResults));
 
     // Go to page 2 and scrape
@@ -47,7 +47,7 @@ async function handleHomepage(page, requestQueue) {
         await nextPage.click();
         await page.waitForNavigation();
 
-        const secondPageResults = await getItems(page, pageData, label);
+        const secondPageResults = await getItems(request, page, pageData, label);
         const positionOffset = firstPageResults.length;
         await Apify.pushData(injectItemPositions(secondPageResults, positionOffset));
     }
