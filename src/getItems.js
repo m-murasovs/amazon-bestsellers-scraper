@@ -88,7 +88,7 @@ async function getItems(request, page, pageData, label) {
             thumbnail: imgsObj[i],
         };
     })
-
+    
     return items;
 }
 

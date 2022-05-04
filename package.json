@@ -3,10 +3,9 @@
     "version": "0.0.1",
     "description": "Automatically extract the top selling items across all main categories.",
     "dependencies": {
-        "@types/cheerio": "^0.22.24",
-        "apify": "^2.2.1",
-        "puppeteer": "*",
-        "cheerio": "^1.0.0-rc.5"
+        "apify": "2.2.2",
+        "cheerio": "^1.0.0-rc.5",
+        "puppeteer": "*"
     },
     "devDependencies": {
         "@apify/eslint-config": "0.0.3",
